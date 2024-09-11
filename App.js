@@ -26,7 +26,30 @@ function Homescr({navigation}) {
   );
 }
 
+// Do somthing
 function Bodyscr_1({navigation}) {
+  return (
+    <View style = {styles.container_2}>
+      <Text style = {styles.text_2}>This is A detail screen</Text>
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Text style={presstableStyle.text}>Home</Text>
+
+      </Pressable>
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={() => navigation.navigate('Second Page')}
+      >
+        <Text style={presstableStyle.text}>View Image</Text>
+
+      </Pressable>
+    </View>
+  );
+}
+
+function Bodyscr_3({navigation}) {
   return (
     <View style = {styles.container_2}>
       <Text style = {styles.text_2}>This is A detail screen</Text>
