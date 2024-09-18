@@ -1,7 +1,11 @@
+import './gesture-handler';
+
 import * as React from 'react';
 import { View, Text, StyleSheet, Button, Pressable } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {useEffect} from 'react';
@@ -17,7 +21,7 @@ function Homescr({navigation}) {
       <Text style = {styles.text_1}>This is Homescreen</Text>
       <Pressable 
         style={presstableStyle.button}
-        onPress={() => navigation.navigate('First Page')}
+        onPress={() => navigation.navigate('Detail')}
       >
         <Text style={presstableStyle.text}>Next Page</Text>
 
@@ -40,29 +44,7 @@ function Bodyscr_1({navigation}) {
       </Pressable>
       <Pressable 
         style={presstableStyle.button}
-        onPress={() => navigation.navigate('Second Page')}
-      >
-        <Text style={presstableStyle.text}>View Image</Text>
-
-      </Pressable>
-    </View>
-  );
-}
-
-function Bodyscr_3({navigation}) {
-  return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>This is A detail screen</Text>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
-
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Second Page')}
+        onPress={() => navigation.navigate('Picture')}
       >
         <Text style={presstableStyle.text}>View Image</Text>
 
@@ -92,7 +74,7 @@ function Bodyscr_2({navigation}) {
       </Pressable>
       <Pressable 
         style={presstableStyle.button}
-        onPress={() => navigation.navigate('First Page')}
+        onPress={() => navigation.navigate('Detail')}
       >
         <Text style={presstableStyle.text}>Next Page</Text>
 
@@ -101,7 +83,21 @@ function Bodyscr_2({navigation}) {
   );
 }
 
+function StackNavi() {
+  return (
+  <NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen name = "Home" component={Homescr} />
+      <Stack.Screen name = "First Page" component={Bodyscr_1} />
+      <Stack.Screen name = "Second Page" component={Bodyscr_2} />
+    </Stack.Navigator>
+  </NavigationContainer>
+  );
+}
+
+
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
 function App() {
   const [loaded, error] = useFonts({
@@ -120,11 +116,11 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name = "Home" component={Homescr} />
-        <Stack.Screen name = "First Page" component={Bodyscr_1} />
-        <Stack.Screen name = "Second Page" component={Bodyscr_2} />
-      </Stack.Navigator>
+      <Drawer.Navigator initialRouteName = "Home">
+        <Drawer.Screen name = "Home" component={Homescr} />
+        <Drawer.Screen name = "Detail" component={Bodyscr_1} />
+        <Drawer.Screen name = "Picture" component={Bodyscr_2} />
+      </Drawer.Navigator>
     </NavigationContainer>
   );
 }
