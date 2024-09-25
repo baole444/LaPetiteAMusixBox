@@ -133,7 +133,6 @@ function listTable() {
             console.error('Error executing query: ', error);
             return;
         }
-        
         if (results.length > 0) {
             console.log('Tables in the database:');
             results.forEach((row) => {

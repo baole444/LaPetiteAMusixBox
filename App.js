@@ -4,7 +4,6 @@ import * as React from 'react';
 import axios from 'axios';
 import { View, Text, StyleSheet, Button, Pressable, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import { useFonts } from 'expo-font';
@@ -75,9 +74,39 @@ function Bodyscr_2({navigation}) {
       </Pressable>
       <Pressable 
         style={presstableStyle.button}
-        onPress={() => navigation.navigate('Detail')}
+        onPress={() => navigation.navigate('LPAMB')}
       >
-        <Text style={presstableStyle.text}>Next Page</Text>
+        <Text style={presstableStyle.text}>LPAMB</Text>
+
+      </Pressable>
+    </View>
+  );
+}
+
+function Bodyscr_4({navigation}) {
+  return (
+    <View style = {styles.container_2}>
+      <Text style = {styles.text_2}>Behold, image</Text>
+      <Image 
+        style = {styles.image}
+        placeholder={require('./assets/texture/TCB icon.png')}
+        placeholderContentFit='contain'
+        source={require('./assets/texture/LPAMB.png')}
+        contentFit='contain'
+        transition={1000}
+      />
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Text style={presstableStyle.text}>Home</Text>
+
+      </Pressable>
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={() => navigation.navigate('Post Test')}
+      >
+        <Text style={presstableStyle.text}>To Post test</Text>
 
       </Pressable>
     </View>
@@ -135,6 +164,7 @@ function App() {
         <Drawer.Screen name = "Home" component={Homescr} />
         <Drawer.Screen name = "Detail" component={Bodyscr_1} />
         <Drawer.Screen name = "Picture" component={Bodyscr_2} />
+        <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
         <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
       </Drawer.Navigator>
     </NavigationContainer>

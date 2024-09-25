@@ -2,7 +2,7 @@ mysql:
   host: 'localhost'
   user: 'LPAMB'
   password: 'LpamBroot'
-  database: 'LPAMB_track_data'
+  database: 'lpamb_track_data'
   connectionLimit: 100,
   maxIdle: 50,
   waitForConnections: true,
