@@ -1,7 +1,8 @@
 import './gesture-handler';
 
 import * as React from 'react';
-import { View, Text, StyleSheet, Button, Pressable } from 'react-native';
+import axios from 'axios';
+import { View, Text, StyleSheet, Button, Pressable, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -83,20 +84,34 @@ function Bodyscr_2({navigation}) {
   );
 }
 
-function StackNavi() {
+function Bodyscr_3({navigation}) {
+  const sendData = () => {
+    const data = {
+      message: "Test message send from application."
+    };
+
+    axios.post('http://192.168.114.221:25565/test', {data}).then(response => {
+      console.log('Recieve response from server:', response.data);
+      Alert.alert('Server Response', JSON.stringify(response.data));
+    }).catch(error => {
+      console.error('Error: ', error);
+      Alert.alert('Error', 'Unexpected error!');
+    });
+  };
   return (
-  <NavigationContainer>
-    <Stack.Navigator>
-      <Stack.Screen name = "Home" component={Homescr} />
-      <Stack.Screen name = "First Page" component={Bodyscr_1} />
-      <Stack.Screen name = "Second Page" component={Bodyscr_2} />
-    </Stack.Navigator>
-  </NavigationContainer>
+    <View style = {styles.container_2}>
+      <Text style = {styles.text_2}>Test server post</Text>
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={sendData}
+      >
+        <Text style={presstableStyle.text}>Send data</Text>
+
+      </Pressable>
+    </View>
   );
 }
 
-
-const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function App() {
@@ -120,6 +135,7 @@ function App() {
         <Drawer.Screen name = "Home" component={Homescr} />
         <Drawer.Screen name = "Detail" component={Bodyscr_1} />
         <Drawer.Screen name = "Picture" component={Bodyscr_2} />
+        <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
