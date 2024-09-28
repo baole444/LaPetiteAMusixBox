@@ -2,14 +2,14 @@ import './gesture-handler';
 
 import * as React from 'react';
 import axios from 'axios';
-import { View, Text, StyleSheet, Button, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 import { Image } from 'expo-image';
+import Image_reload from './Image_reload';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -87,13 +87,9 @@ function Bodyscr_4({navigation}) {
   return (
     <View style = {styles.container_2}>
       <Text style = {styles.text_2}>Behold, image</Text>
-      <Image 
-        style = {styles.image}
-        placeholder={require('./assets/texture/TCB icon.png')}
-        placeholderContentFit='contain'
-        source={require('./assets/texture/LPAMB.png')}
-        contentFit='contain'
-        transition={1000}
+      <Image_reload
+        src={'./assets/texture/LPAMB.png'}
+        scale={2}
       />
       <Pressable 
         style={presstableStyle.button}
@@ -176,6 +172,8 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     backgroundColor: 'rgba(1,1,1,0)',
+    resizeMode: 'contain',
+    imageRendering: 'pixelated',
   },
   container_1: {
     flex: 1,
