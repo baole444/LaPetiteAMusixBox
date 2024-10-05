@@ -2,14 +2,18 @@ import './gesture-handler';
 
 import * as React from 'react';
 import axios from 'axios';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, TextInput, Button } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
 import Image_reload from './Image_reload';
+import { ScrollView } from 'react-native-gesture-handler';
+import PlayerScreen from './Sreens/playerAllscr';
+import asyncQueueManager from './async-queue-manager';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,7 +22,7 @@ SplashScreen.preventAutoHideAsync();
 function Homescr({navigation}) {
   return (
     <View style = {styles.container_1}>
-      <Text style = {styles.text_1}>This is Homescreen</Text>
+      <Text style = {styles.text_1}>LPAMB Test App</Text>
       <Pressable 
         style={presstableStyle.button}
         onPress={() => navigation.navigate('Detail')}
@@ -47,6 +51,22 @@ function Bodyscr_1({navigation}) {
         onPress={() => navigation.navigate('Picture')}
       >
         <Text style={presstableStyle.text}>View Image</Text>
+
+      </Pressable>
+
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={() => asyncQueueManager.dumpQueueData()}
+      >
+        <Text style={presstableStyle.text}>Dump async storage queue to log</Text>
+
+      </Pressable>
+
+      <Pressable 
+        style={presstableStyle.button}
+        onPress={() => asyncQueueManager.clearQueue()}
+      >
+        <Text style={presstableStyle.text}>Clear queue</Text>
 
       </Pressable>
     </View>
@@ -88,7 +108,7 @@ function Bodyscr_4({navigation}) {
     <View style = {styles.container_2}>
       <Text style = {styles.text_2}>Behold, image</Text>
       <Image_reload
-        src={'./assets/texture/LPAMB.png'}
+        src={require('./assets/texture/LPAMB.png')}
         scale={2}
       />
       <Pressable 
@@ -109,23 +129,38 @@ function Bodyscr_4({navigation}) {
   );
 }
 
-function Bodyscr_3({navigation}) {
-  const sendData = () => {
-    const data = {
-      message: "Test message send from application."
-    };
+const sendPlayRequest = async (track_id) => {
+  asyncQueueManager.pushQueue(track_id);
+  console.log('Added to queue.');
+};
 
-    axios.post('http://192.168.114.221:25565/test', {data}).then(response => {
-      console.log('Recieve response from server:', response.data);
-      Alert.alert('Server Response', JSON.stringify(response.data));
+
+function Bodyscr_3() {
+  const [trackList, setTrackData] = useState([]);
+  const [keyword, setKeyword] = useState('');
+
+  const sendData = () => {
+    const data = keyword;
+
+    axios.post('http://192.168.114.221:25565/search', {data}).then(response => {
+      //console.log('Recieve response from server:', response.data);
+      setTrackData(response.data);
+
     }).catch(error => {
       console.error('Error: ', error);
-      Alert.alert('Error', 'Unexpected error!');
+      setTrackData([{ title: 'Error fetching data from server.'}]);
     });
   };
+
   return (
     <View style = {styles.container_2}>
       <Text style = {styles.text_2}>Test server post</Text>
+      <TextInput
+        style = {text_field.search}
+        placeholder="Search for music"
+        value={keyword}
+        onChangeText={setKeyword}
+      />
       <Pressable 
         style={presstableStyle.button}
         onPress={sendData}
@@ -133,6 +168,26 @@ function Bodyscr_3({navigation}) {
         <Text style={presstableStyle.text}>Send data</Text>
 
       </Pressable>
+
+      <ScrollView style = {styles.scrollStyle}>
+        {trackList.length > 0 ? (
+          trackList.map((item, index) => (
+            <View key = {index} style = {styles.list_container}>
+              <Text style ={styles.text_scroll}>{item.title}</Text>
+              <Text style ={styles.text_scroll}>by {item.artist} in {item.album}</Text>
+              <Pressable
+                style={presstableStyle.button_scroll}
+                onPress={() => sendPlayRequest(item.trackId)}
+              >
+                <Text style={presstableStyle.text_scroll}>Add to queue</Text>
+              </Pressable>
+              <Text style ={styles.seperator}>------------------------------</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.text_scroll}>No track found.</Text>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -155,19 +210,31 @@ function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Drawer.Navigator initialRouteName = "Home">
-        <Drawer.Screen name = "Home" component={Homescr} />
-        <Drawer.Screen name = "Detail" component={Bodyscr_1} />
-        <Drawer.Screen name = "Picture" component={Bodyscr_2} />
-        <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
-        <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <View style={styles.container}>
+      <NavigationContainer>
+        <Drawer.Navigator initialRouteName = "Home">
+          <Drawer.Screen name = "Home" component={Homescr} />
+          <Drawer.Screen name = "Detail" component={Bodyscr_1} />
+          <Drawer.Screen name = "Picture" component={Bodyscr_2} />
+          <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
+          <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
+        </Drawer.Navigator>
+      </NavigationContainer>
+      <PlayerScreen/>
+      <View>
+        <Text style={styles.text_dev_warn}>This is an experimental build and is not the final product</Text>
+        <Text style={styles.text_dev_warn}>The build may be sujected to bugs or unexpected behaviours</Text>
+        <Text style={styles.text_dev_warn}>Tester is informed and advised.</Text>
+      </View>
+    </View>
+
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   image: {
     flex: 1,
     width: '100%',
@@ -201,6 +268,41 @@ const styles = StyleSheet.create({
     margin: 32,
     color: 'yellow',
   },
+  scrollStyle: {
+    marginTop: 20,
+    width: '100%',
+    height: 150,
+    borderColor: 'white',
+    borderWidth: 1,
+    padding: 10,
+  },
+  text_scroll: {
+    fontSize: 14,
+    fontFamily: 'Consola',
+    color: 'yellow',
+  },
+  seperator: {
+    fontSize: 14,
+    fontFamily: 'Consola',
+    color: 'gray',
+  },
+  list_container: {
+    marginBottom: 10,
+  },
+  text_dev_warn: {
+    fontSize: 12,
+    fontFamily: 'Consola',
+    color: 'orange',
+    textAlign: 'left',
+    padding: 4,
+  },
+  text_dev_issue: {
+    fontSize: 14,
+    fontFamily: 'Consola',
+    color: 'red',
+    textAlign: 'left',
+    padding: 4,
+  },
 });
 
 const presstableStyle = StyleSheet.create({
@@ -219,7 +321,32 @@ const presstableStyle = StyleSheet.create({
     fontWeight: 'bold',
     color: 'orange',
   },
+  button_scroll: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    paddingHorizontal: 24,
+    borderRadius:4,
+    elevation: 0,
+    backgroundColor: 'transparent',
+  },
+  text_scroll: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: 'orange',
+  },
 
+});
+
+const text_field = StyleSheet.create({
+  search: {
+    marginVertical: 8,
+    marginHorizontal: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    backgroundColor: 'white',
+    width: 300,
+  }
 })
 
 export default App;

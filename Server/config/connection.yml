@@ -10,3 +10,7 @@ mysql:
   keepAliveInitialDelay: 0,
   idleTimeout: 120000,
   port: 3306
+server:
+  port: 25565
+  storage: 'storage'
+  track: 'music'
