@@ -2,7 +2,7 @@ import './gesture-handler';
 
 import * as React from 'react';
 import axios from 'axios';
-import { View, Text, StyleSheet, Pressable, Alert, TextInput, Button } from 'react-native';
+import { KeyboardAvoidingView, Platform, View, Text, StyleSheet, Pressable, Alert, TextInput, Button } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -76,7 +76,7 @@ function Bodyscr_1({navigation}) {
 function Bodyscr_2({navigation}) {
   return (
     <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Behold, image</Text>
+      <Text style = {styles.text_2}>Expo Image library test</Text>
       <Image 
         style = {styles.image}
         placeholder={require('./assets/texture/TCB icon.png')}
@@ -106,7 +106,7 @@ function Bodyscr_2({navigation}) {
 function Bodyscr_4({navigation}) {
   return (
     <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Behold, image</Text>
+      <Text style = {styles.text_2}>Image Reload via skia canvas test</Text>
       <Image_reload
         src={require('./assets/texture/LPAMB.png')}
         scale={2}
@@ -142,13 +142,19 @@ function Bodyscr_3() {
   const sendData = () => {
     const data = keyword;
 
-    axios.post('http://192.168.114.221:25565/search', {data}).then(response => {
-      //console.log('Recieve response from server:', response.data);
-      setTrackData(response.data);
+    axios.post('http://192.168.115.221:25565/search', {data}).then(response => {
+        //console.log('Recieve response from server:', response.data);
+        
+        if (Array.isArray(response.data)) {
+            setTrackData(response.data);
+        } else {
+            setTrackData([]);
+        }
+
 
     }).catch(error => {
-      console.error('Error: ', error);
-      setTrackData([{ title: 'Error fetching data from server.'}]);
+        console.log('Error: ', error);
+        setTrackData([]);
     });
   };
 
@@ -170,7 +176,7 @@ function Bodyscr_3() {
       </Pressable>
 
       <ScrollView style = {styles.scrollStyle}>
-        {trackList.length > 0 ? (
+        {Array.isArray(trackList) && trackList.length > 0 ? (
           trackList.map((item, index) => (
             <View key = {index} style = {styles.list_container}>
               <Text style ={styles.text_scroll}>{item.title}</Text>
@@ -211,23 +217,26 @@ function App() {
 
   return (
     <View style={styles.container}>
-      <NavigationContainer>
-        <Drawer.Navigator initialRouteName = "Home">
-          <Drawer.Screen name = "Home" component={Homescr} />
-          <Drawer.Screen name = "Detail" component={Bodyscr_1} />
-          <Drawer.Screen name = "Picture" component={Bodyscr_2} />
-          <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
-          <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
-        </Drawer.Navigator>
-      </NavigationContainer>
-      <PlayerScreen/>
-      <View>
-        <Text style={styles.text_dev_warn}>This is an experimental build and is not the final product</Text>
-        <Text style={styles.text_dev_warn}>The build may be sujected to bugs or unexpected behaviours</Text>
-        <Text style={styles.text_dev_warn}>Tester is informed and advised.</Text>
-      </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1}}
+      >
+        <NavigationContainer>
+          <Drawer.Navigator initialRouteName = "Home">
+            <Drawer.Screen name = "Home" component={Homescr} />
+            <Drawer.Screen name = "Detail" component={Bodyscr_1} />
+            <Drawer.Screen name = "Picture" component={Bodyscr_2} />
+            <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
+            <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
+          </Drawer.Navigator>
+        </NavigationContainer>
+        <PlayerScreen/>
+        <View>
+          <Text style={styles.text_dev_warn}>This is an experimental build and is not the final product. The build may be sujected to bugs or unexpected behaviours</Text>
+          <Text style={styles.text_dev_warn}>Tester is informed and advised.</Text>
+        </View>
+      </KeyboardAvoidingView>
     </View>
-
   );
 }
 

@@ -20,15 +20,14 @@ const currentTrack = async () => {
     return null;
 }
 
-const nextTrack = async () => {
-    const queue = await readQueue ();
+const seekTrack = async (position) => {
+    const queue = await readQueue();
     if (queue.length > 0) {
-        const next = queue[1];
-        return next;
+        const result = queue[position];
+        return result;
     }
     return null;
 }
-
 const upNext = async () => {
     const queue = await readQueue();
     if (queue.length > 0) {
@@ -64,7 +63,7 @@ export default {
     pushQueue,
     readQueue,
     currentTrack,
-    nextTrack,
+    seekTrack,
     upNext,
     dumpQueueData,
     clearQueue,

@@ -15,6 +15,7 @@ const musicPlayerHook = () => {
     const [currentTrackID, setCurrentTrackID] = useState(null);
     const [isIdReady, setIsIdReady] = useState(false);
     const [trackName, setTrackName] = useState(null);
+    const [looping, setLooping] = useState(false);
     
     // Fetching track ID from queue
     useEffect(() => {
@@ -28,18 +29,30 @@ const musicPlayerHook = () => {
                 //console.warn("Fetched an empty or null entry.");
                 return;
             }
-
-            if (fetchedID !== currentTrackID) {
-                setCurrentTrackID(fetchedID);
-                console.log(`Current track ID updated with ${fetchedID}`);
-                setIsIdReady(true);
-
+            
+            if (fetchedID) {
+                if (fetchedID !== currentTrackID) {
+                    setCurrentTrackID(fetchedID);
+                    console.log(`Current track ID updated with ${fetchedID}`);
+                    setIsIdReady(true);
+                }
             }
         }, 3000);
 
         return () => clearInterval(interval);
     }, [currentTrackID, isLoading, instTrackID]);
     
+
+    useEffect(() => {
+        if (sound) {
+            if (looping) {
+                sound.setIsLoopingAsync(true);
+            } else {
+                sound.setIsLoopingAsync(false);
+            }
+        }
+    }, [looping, sound]);
+
     // Playing state toggle
     useEffect(() => {
         if (sound) {
@@ -51,6 +64,13 @@ const musicPlayerHook = () => {
         }
     }, [playing, sound]);
 
+    const trackSkipper = () => {
+        if (sound) {
+            sound.setPositionAsync(duration);
+            console.log('Skipping the track...');
+        }
+    }
+    
     const trackHandler = async () => {
         console.log('Handling trackID: ',currentTrackID); // Log to verify trackID passed in
         if (!currentTrackID) {
@@ -103,20 +123,29 @@ const musicPlayerHook = () => {
                     }
                 });
             }
-        }, 1000); // Adjust the interval as needed
+            }, 1000); // Adjust the interval as needed
 
             sound.setOnPlaybackStatusUpdate(async (status) => {
+                const nextTrackLookUp = await asyncQueueManager.seekTrack(1);
                 if (status.positionMillis >= status.durationMillis && instTrackID) {
-
-                    console.log('Track finished playing.');
-                    setProgress(0);
-                    await asyncQueueManager.upNext();
-                    console.log('Queue was pushed up.');
-
-                    clearInterval(timer);
-                    clearInterval(intervalId);
-
-                    setInstTrackID(null);
+                    if(!status.isLooping) {
+                        console.log('Track finished playing.');
+                        setProgress(0);
+                        if (nextTrackLookUp === currentTrackID) {
+                            console.log('Next track contained same ID, rewinding and skip loading...')
+                            sound.setPositionAsync(0);
+                            await asyncQueueManager.upNext();
+                            console.log('Queue was pushed up.');
+                        } else {
+                            await asyncQueueManager.upNext();
+                            console.log('Queue was pushed up.');
+        
+                            clearInterval(timer);
+                            clearInterval(intervalId);
+        
+                            setInstTrackID(null);
+                        }
+                    }
                 }
             })
  
@@ -142,7 +171,7 @@ const musicPlayerHook = () => {
         }
     }, [sound])
 
-    return { playing, setPlaying, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName };
+    return { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName };
 }
 
 
@@ -162,7 +191,7 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
         return { newTrack: null, trackId: null };
     }
     try {
-        const response = await axios.post('http://192.168.114.221:25565/api/response/play', {data: trackID}, {responseType: 'arraybuffer'});
+        const response = await axios.post('http://192.168.115.221:25565/api/response/play', {data: trackID}, {responseType: 'arraybuffer'});
             
         if (response && response.data) {
             const base64String = arrayBufferToBase64(response.data);
@@ -199,7 +228,7 @@ const loadName = async (id, setTrackName) => {
         setTrackName('Error: Failed to query for title')
     }
     try {
-        const response = await axios.post('http://192.168.114.221:25565/api/response/title', {data: id});
+        const response = await axios.post('http://192.168.115.221:25565/api/response/title', {data: id});
             
         if (response && response.data) {
             console.log(`Title is: ${response.data}`)
