@@ -11,6 +11,11 @@ const readQueue = async () => {
     return queue ? JSON.parse(queue) : [];
 };
 
+const readIp = async () => {
+    const queue = await AsyncStorage.getItem('serverIp');
+    return queue ? JSON.parse(queue) : [];
+};
+
 const currentTrack = async () => {
     const queue = await readQueue ();
     if (queue.length > 0) {
@@ -59,12 +64,49 @@ const clearQueue = async () => {
     }
 };
 
+const pushIp = async (ip) => {
+    try {
+        await AsyncStorage.removeItem('serverIp');
+        console.log('Cleared IP data...');
+
+        await AsyncStorage.setItem('serverIp', JSON.stringify([ip])); 
+    } catch (error) {
+        console.log('Error clearing ip:', error.message);
+    }
+
+};
+
+const seekIp = async () => {
+    const ip = await readIp();
+    if (ip.length > 0) {
+        const result = ip[0];
+        return result;
+    }
+    return null;
+}
+
+const dumpIpData = async () => {
+    try {
+        const jsonValue = await AsyncStorage.getItem('serverIp'); // Retrieve the stored queue data
+        if (jsonValue != null) {
+            const queueData = JSON.parse(jsonValue); // Parse the JSON string back to an array
+            console.log('Ip Data:', queueData); // Log the queue data
+        } else {
+            console.log('No Ip found.'); // Log if no data is found
+        }
+    } catch (e) {
+        console.error('Error retrieving Ip data:', e.message); // Handle errors
+    }
+};
+
 export default {
     pushQueue,
-    readQueue,
     currentTrack,
     seekTrack,
     upNext,
     dumpQueueData,
     clearQueue,
+    pushIp,
+    seekIp,
+    dumpIpData
 };

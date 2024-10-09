@@ -1,7 +1,7 @@
 import asyncQueueManager from "../async-queue-manager";
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Audio } from 'expo-av';
+import axios from "axios";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 
 const musicPlayerHook = () => {
     const [sound, setSound] = useState(null);
@@ -72,6 +72,16 @@ const musicPlayerHook = () => {
     }
     
     const trackHandler = async () => {
+        Audio.setAudioModeAsync({
+            staysActiveInBackground: true,
+            allowsRecordingIOS: false,
+            interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+            interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+            playThroughEarpieceAndroid: false,
+        });
+
         console.log('Handling trackID: ',currentTrackID); // Log to verify trackID passed in
         if (!currentTrackID) {
             console.log("trackID is undefined. Aborting track load.");
@@ -191,30 +201,32 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
         return { newTrack: null, trackId: null };
     }
     try {
-        const response = await axios.post('http://192.168.115.221:25565/api/response/play', {data: trackID}, {responseType: 'arraybuffer'});
-            
-        if (response && response.data) {
-            const base64String = arrayBufferToBase64(response.data);
-            const trackUrl = `data:audio/mpeg;base64,${base64String}`;
-
-            // Unload current sound if request to play another track
-            if (sound) {
-                await sound.unloadAsync();
-                setSound(null);
+        const ip = await asyncQueueManager.seekIp();
+        if (ip) {
+            const response = await axios.post(ip + '/api/response/play', {data: trackID}, {responseType: 'arraybuffer'});
+            if (response && response.data) {
+                const base64String = arrayBufferToBase64(response.data);
+                const trackUrl = `data:audio/mpeg;base64,${base64String}`;
+    
+                // Unload current sound if request to play another track
+                if (sound) {
+                    await sound.unloadAsync();
+                    setSound(null);
+                }
+    
+                // Create new sound instance
+                const { sound: newTrack } = await Audio.Sound.createAsync(
+                    { uri: trackUrl },
+                    { shouldPlay: false }
+                );
+                setInstTrackID(trackID);
+                //console.log('New track generated: ', newTrack);
+                return { newTrack, trackId: trackID }
+    
+            } else {
+                console.warn('Response empty!');
+                return { newTrack: null, trackId: null };
             }
-
-            // Create new sound instance
-            const { sound: newTrack } = await Audio.Sound.createAsync(
-                { uri: trackUrl },
-                { shouldPlay: false }
-            );
-            setInstTrackID(trackID);
-            //console.log('New track generated: ', newTrack);
-            return { newTrack, trackId: trackID }
-
-        } else {
-            console.warn('Response empty!');
-            return { newTrack: null, trackId: null };
         }
     } catch (e) {
         console.warn('Cannot load track with error: ', e.message);
@@ -228,15 +240,19 @@ const loadName = async (id, setTrackName) => {
         setTrackName('Error: Failed to query for title')
     }
     try {
-        const response = await axios.post('http://192.168.115.221:25565/api/response/title', {data: id});
+        const ip = await asyncQueueManager.seekIp();
+        if (ip) {
+            const response = await axios.post(ip + '/api/response/title', {data: id});
             
-        if (response && response.data) {
-            console.log(`Title is: ${response.data}`)
-            setTrackName(response.data);
-        } else {
-            console.warn('Response empty!');
-            setTrackName('Error: Failed to query for title')
+            if (response && response.data) {
+                console.log(`Title is: ${response.data}`)
+                setTrackName(response.data);
+            } else {
+                console.warn('Response empty!');
+                setTrackName('Error: Failed to query for title')
+            }
         }
+
     } catch (e) {
         console.warn('Cannot get title: ', e.message);
         setTrackName('Error: Failed to query for title')

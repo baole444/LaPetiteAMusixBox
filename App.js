@@ -1,9 +1,8 @@
 import './gesture-handler';
-
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as React from 'react';
 import axios from 'axios';
-import { KeyboardAvoidingView, Platform, View, Text, StyleSheet, Pressable, Alert, TextInput, Button } from 'react-native';
-import Slider from '@react-native-community/slider';
+import { View, Text, StyleSheet, Pressable, TextInput, Dimensions} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useFonts } from 'expo-font';
@@ -14,6 +13,11 @@ import Image_reload from './Image_reload';
 import { ScrollView } from 'react-native-gesture-handler';
 import PlayerScreen from './Sreens/playerAllscr';
 import asyncQueueManager from './async-queue-manager';
+import LoginScr from './Sreens/loginScreen';
+import musicPlayerHook from './musicPlayer/music-player';
+import NotifiPlayer from './musicPlayer/notfiPlayer';
+import * as Notifications from 'expo-notifications';
+import DevIpConfig from './Sreens/devIp';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -141,21 +145,25 @@ function Bodyscr_3() {
 
   const sendData = () => {
     const data = keyword;
+    asyncQueueManager.seekIp().then(ip => {
+      if (ip) {
+        axios.post(ip + '/search', {data}).then(response => {
+          //console.log('Recieve response from server:', response.data);
+          
+          if (Array.isArray(response.data)) {
+              setTrackData(response.data);
+          } else {
+              setTrackData([]);
+          }
+  
+  
+      }).catch(error => {
+          console.log('Error: ', error.message);
+          setTrackData([]);
+      });
+      }
+    })
 
-    axios.post('http://192.168.115.221:25565/search', {data}).then(response => {
-        //console.log('Recieve response from server:', response.data);
-        
-        if (Array.isArray(response.data)) {
-            setTrackData(response.data);
-        } else {
-            setTrackData([]);
-        }
-
-
-    }).catch(error => {
-        console.log('Error: ', error);
-        setTrackData([]);
-    });
   };
 
   return (
@@ -199,45 +207,88 @@ function Bodyscr_3() {
 }
 
 const Drawer = createDrawerNavigator();
+const windowsDimensions = Dimensions.get('window');
+const screenDimensions = Dimensions.get('screen');
+
+axios.defaults.validateStatus = () => true;
+
+const requestPerm = async () => {
+  const { perm } = await Notifications.getPermissionsAsync();
+  if (perm !== 'granted') {
+      await Notifications.requestPermissionsAsync();
+  }
+  console.log('Notification permission: ', perm);
+}
 
 function App() {
-  const [loaded, error] = useFonts({
-      'Caudex': require('./assets/fonts/Caudex.ttf'),
-      'Consola': require("./assets/fonts/Consola.ttf"),
-  }); 
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
+    const [loaded, error] = useFonts({
+        'Caudex': require('./assets/fonts/Caudex.ttf'),
+        'Consola': require("./assets/fonts/Consola.ttf"),
+    }); 
+
+    const [dimensions, setDimensions] = useState({
+        window: windowsDimensions,
+        screen: screenDimensions,
+    });
+
+    const { playing, setPlaying, looping, setLooping, trackSkipper, trackName } = musicPlayerHook();
+
+    useEffect(() => {
+      const listener = Dimensions.addEventListener(
+        'change', ({window, screen}) => {
+          setDimensions({window, screen});
+        },
+      );
+      return () => listener?.remove();
+    });
+
+    useEffect(() => {
+        if (loaded || error) {
+            SplashScreen.hideAsync();
+        }
+    }, [loaded, error]);
+
+    useEffect(() => {
+      requestPerm();
+      NotifiPlayer(playing, setPlaying, looping, setLooping, trackSkipper, trackName);
+    }, [playing, looping, trackName]);
+
+    if (!loaded && !error) {
+        return null;
     }
-  }, [loaded, error]);
 
-  if (!loaded && !error) {
-    return null;
-  }
 
-  return (
-    <View style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1}}
-      >
-        <NavigationContainer>
-          <Drawer.Navigator initialRouteName = "Home">
-            <Drawer.Screen name = "Home" component={Homescr} />
-            <Drawer.Screen name = "Detail" component={Bodyscr_1} />
-            <Drawer.Screen name = "Picture" component={Bodyscr_2} />
-            <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
-            <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
-          </Drawer.Navigator>
-        </NavigationContainer>
-        <PlayerScreen/>
-        <View>
-          <Text style={styles.text_dev_warn}>This is an experimental build and is not the final product. The build may be sujected to bugs or unexpected behaviours</Text>
-          <Text style={styles.text_dev_warn}>Tester is informed and advised.</Text>
+    return (
+      <GestureHandlerRootView>
+        <View style={styles.container}>
+          <NavigationContainer>
+            <Drawer.Navigator 
+              initialRouteName = "Home"
+              screenOptions={
+                {
+                  drawerStyle: {
+                    width: windowsDimensions.width * 0.5
+                  },
+                }
+              }
+            >
+              <Drawer.Screen name = "Home" component={Homescr} />
+              <Drawer.Screen name = "Detail" component={Bodyscr_1} />
+              <Drawer.Screen name = "Picture" component={Bodyscr_2} />
+              <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
+              <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
+              <Drawer.Screen name = "Login screen" component={LoginScr} />
+              <Drawer.Screen name = "Dev portal" component={DevIpConfig} />
+            </Drawer.Navigator>
+          </NavigationContainer>
+          <PlayerScreen/>
+          <View>
+            <Text style={styles.text_dev_warn}>This is an experimental build and is not the final product. The build may be sujected to bugs or unexpected behaviours</Text>
+            <Text style={styles.text_dev_warn}>Tester is informed and advised.</Text>
+          </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  );
+      </GestureHandlerRootView> 
+    );
 }
 
 const styles = StyleSheet.create({

@@ -1,3 +1,5 @@
+const https = require('https');
+const http = require('http');
 const express = require('express');
 const parser = require('body-parser');
 const cors = require('cors');
@@ -15,18 +17,24 @@ const {
 } = require('./queryFunction');
 const fs = require('fs');
 const path = require('path');
-
+const certificatePath = path.join(__dirname, cfg.server.config, cfg.server.certificate);
 
 const port = cfg.server.port;
 const platform = os.platform();
-let Instant; 
+let Instant;
+let InstHttps;
+let InstHttp;
 let dataBase;
-
+const sslCer = {
+    key: fs.readFileSync(path.resolve(certificatePath, 'key.pem')),
+    cert: fs.readFileSync(path.resolve(certificatePath, 'cert.pem')),
+};
 
 function start(dataBase) {
     // server init
     const server = express();
-    server.use(cors());
+
+    server.use(cors({ origin: '*'}));
     server.use(parser.json());
 
     console.log(`Running on ${platform}`);
@@ -151,14 +159,27 @@ function start(dataBase) {
             rep.status(404).send('Server encounting an error playing your music');
         }
     });
-    
-    // server listening log
-    Instant = server.listen(port, ()=> {
+
+    //const httpServer = http.createServer((req, res) => {
+    //    res.writeHead(301, { "Location": `https://${req.headers.host}${req.url}` });
+    //    res.end();
+    //});
+    //
+    const httpsServer = https.createServer(sslCer, server);
+    //InstHttp = httpServer.listen(port, ()=> {
+    //    term.prompt();
+    //})
+    //
+    //// server listening log
+    Instant = httpsServer.listen(port, ()=> {
         console.log(`Server listening on port ${port}`);
         term.prompt();
     });
+    //Instant = server.listen(port, ()=> {
+    //    console.log(`Server listening on port ${port}`);
+    //    term.prompt();
+    //});
     
-
 }
 
 DBconnect((conn) => {
