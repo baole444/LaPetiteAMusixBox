@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "La Petite A Musix Box",
-    "slug": "a_petite_a_musix_box",
+    "name": "Music_App_GroupProject",
+    "slug": "Music_App_GroupProject",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/texture/LPAMB.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -12,23 +12,16 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "arsky.LPAMB.player",
-      "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ]
-      }
+      "supportsTablet": true
     },
     "android": {
-      "package": "arsky.LPAMB.player",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/texture/LPAMB.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/texture/LPAMB.png"
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
@@ -41,11 +34,6 @@
         }
       ],
       "expo-asset"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "d6ff398d-7350-4a7e-b9d7-b3c579bcbf21"
-      }
-    }
+    ]
   }
 }

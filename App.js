@@ -1,412 +1,581 @@
-import './gesture-handler';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import * as React from 'react';
-import axios from 'axios';
-import { View, Text, StyleSheet, Pressable, TextInput, Dimensions} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
-import { Image } from 'expo-image';
-import Image_reload from './Image_reload';
-import { ScrollView } from 'react-native-gesture-handler';
-import PlayerScreen from './Sreens/playerAllscr';
-import asyncQueueManager from './async-queue-manager';
-import LoginScr from './Sreens/loginScreen';
-import musicPlayerHook from './musicPlayer/music-player';
-import NotifiPlayer from './musicPlayer/notfiPlayer';
-import * as Notifications from 'expo-notifications';
-import DevIpConfig from './Sreens/devIp';
-
-SplashScreen.preventAutoHideAsync();
-
-// Temporary Code for placeholder
-
-function Homescr({navigation}) {
-  return (
-    <View style = {styles.container_1}>
-      <Text style = {styles.text_1}>LPAMB Test App</Text>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Detail')}
-      >
-        <Text style={presstableStyle.text}>Next Page</Text>
-
-      </Pressable>
-    </View>
-  );
-}
-
-// Do somthing
-function Bodyscr_1({navigation}) {
-  return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>This is A detail screen</Text>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
-
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Picture')}
-      >
-        <Text style={presstableStyle.text}>View Image</Text>
-
-      </Pressable>
-
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => asyncQueueManager.dumpQueueData()}
-      >
-        <Text style={presstableStyle.text}>Dump async storage queue to log</Text>
-
-      </Pressable>
-
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => asyncQueueManager.clearQueue()}
-      >
-        <Text style={presstableStyle.text}>Clear queue</Text>
-
-      </Pressable>
-    </View>
-  );
-}
-
-function Bodyscr_2({navigation}) {
-  return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Expo Image library test</Text>
-      <Image 
-        style = {styles.image}
-        placeholder={require('./assets/texture/TCB icon.png')}
-        placeholderContentFit='contain'
-        source={require('./assets/texture/Arsky flag.png')}
-        contentFit='contain'
-        transition={1000}
-      />
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
-
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('LPAMB')}
-      >
-        <Text style={presstableStyle.text}>LPAMB</Text>
-
-      </Pressable>
-    </View>
-  );
-}
-
-function Bodyscr_4({navigation}) {
-  return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Image Reload via skia canvas test</Text>
-      <Image_reload
-        src={require('./assets/texture/LPAMB.png')}
-        scale={2}
-      />
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
-
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Post Test')}
-      >
-        <Text style={presstableStyle.text}>To Post test</Text>
-
-      </Pressable>
-    </View>
-  );
-}
-
-const sendPlayRequest = async (track_id) => {
-  asyncQueueManager.pushQueue(track_id);
-  console.log('Added to queue.');
-};
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FontAwesome } from '@expo/vector-icons'; // For heart, play, pause, shuffle, repeat, etc.
+import { colors } from './Server/constants';
 
 
-function Bodyscr_3() {
-  const [trackList, setTrackData] = useState([]);
-  const [keyword, setKeyword] = useState('');
-
-  const sendData = () => {
-    const data = keyword;
-    asyncQueueManager.seekIp().then(ip => {
-      if (ip) {
-        axios.post(ip + '/search', {data}).then(response => {
-          //console.log('Recieve response from server:', response.data);
-          
-          if (Array.isArray(response.data)) {
-              setTrackData(response.data);
-          } else {
-              setTrackData([]);
-          }
-  
-  
-      }).catch(error => {
-          console.log('Error: ', error.message);
-          setTrackData([]);
-      });
+//NowPlayingScreen
+function NowPlayingScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Enjoy!',
+      headerStyle: {
+        backgroundColor: colors.primary,
       }
-    })
+    });
+  }, [navigation]);
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [isRepeating, setIsRepeating] = useState(false);
+  
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleShuffle = () => {
+    setIsShuffling(!isShuffling);
+  };
+
+  const toggleRepeat = () => {
+    setIsRepeating(!isRepeating);
   };
 
   return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Test server post</Text>
-      <TextInput
-        style = {text_field.search}
-        placeholder="Search for music"
-        value={keyword}
-        onChangeText={setKeyword}
-      />
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={sendData}
-      >
-        <Text style={presstableStyle.text}>Send data</Text>
+    <View style={styles.container}>
+      {/* Header */}
+      
 
-      </Pressable>
+      {/* Album Art and Song Info */}
+      <View style={styles.albumContainer}>
+        <Image
+          source={require('./assets/brenda-lee.png')}
+          style={styles.albumArt}
+        />
+        <Text style={styles.songTitle}>If You Love Me (Really Love Me) <FontAwesome name="heart" size={24} color="gray" style={styles.heartIcon} /></Text>
+        <Text style={styles.artistName}>Brenda Lee </Text>
+        
+      </View>
 
-      <ScrollView style = {styles.scrollStyle}>
-        {Array.isArray(trackList) && trackList.length > 0 ? (
-          trackList.map((item, index) => (
-            <View key = {index} style = {styles.list_container}>
-              <Text style ={styles.text_scroll}>{item.title}</Text>
-              <Text style ={styles.text_scroll}>by {item.artist} in {item.album}</Text>
-              <Pressable
-                style={presstableStyle.button_scroll}
-                onPress={() => sendPlayRequest(item.trackId)}
-              >
-                <Text style={presstableStyle.text_scroll}>Add to queue</Text>
-              </Pressable>
-              <Text style ={styles.seperator}>------------------------------</Text>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.text_scroll}>No track found.</Text>
-        )}
+      {/* Progress Bar and Controls */}
+      <View style={styles.controlsContainer}>
+        <View style={styles.progressBar}>
+          <View style={styles.progressFill} />
+        </View>
+
+        {/* Shuffle, Repeat and Playback Buttons */}
+        <View style={styles.controlButtons}>
+          <Pressable onPress={toggleShuffle}>
+            <FontAwesome
+              name="random"
+              size={24}
+              color={isShuffling ? colors.primary : 'gray'}
+            />
+          </Pressable>
+
+          <FontAwesome name="backward" size={24} color="black" />
+
+          <Pressable onPress={togglePlayPause}>
+            {isPlaying ? (
+              <FontAwesome name="pause" size={24} color="black" />
+            ) : (
+              <FontAwesome name="play" size={24} color="black" />
+            )}
+          </Pressable>
+
+          <FontAwesome name="forward" size={24} color="black" />
+
+          <Pressable onPress={toggleRepeat}>
+            <FontAwesome
+              name="repeat"
+              size={24}
+              color={isRepeating ? colors.primary : 'gray'}
+            />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Next Songs */}
+      <Text style={styles.nextSongsTitle}>Next songs:</Text>
+      <ScrollView horizontal contentContainerStyle={styles.nextSongsContainer}>
+        <View style={styles.songCard}>
+          <Image
+            source={require('./assets/camel.png')}
+            style={styles.songCardImage}
+          />
+          <Text style={styles.songCardTitle}>I Don’t Want to See Tomorrow</Text>
+          <Text style={styles.songCardArtist}>Nat King Cole</Text>
+          <FontAwesome name="times" size={24} color="black" style={styles.removeIcon} />
+        </View>
+
+        {/* Add more song cards here */}
+        <View style={styles.songCardEmpty} />
+        <View style={styles.songCardEmpty} />
       </ScrollView>
     </View>
   );
 }
 
-const Drawer = createDrawerNavigator();
-const windowsDimensions = Dimensions.get('window');
-const screenDimensions = Dimensions.get('screen');
+// HOMESCREEN
+function HomeScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      }
+    });
+  }, [navigation]);
 
-axios.defaults.validateStatus = () => true;
-
-const requestPerm = async () => {
-  const { perm } = await Notifications.getPermissionsAsync();
-  if (perm !== 'granted') {
-      await Notifications.requestPermissionsAsync();
-  }
-  console.log('Notification permission: ', perm);
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image 
+          source={require('./assets/LPAMB.png')} 
+          style={styles.image} 
+        />
+        <Text style={styles.title}>L.A.M.B</Text>
+        <Text style={styles.subtitle}>La à Musix Box</Text>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('GUESS')}>
+          <Text style={styles.buttonText}>Continue as a Guest</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('LOGIN')}>
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('REGISTER')}>
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
-function App() {
-    const [loaded, error] = useFonts({
-        'Caudex': require('./assets/fonts/Caudex.ttf'),
-        'Consola': require("./assets/fonts/Consola.ttf"),
-    }); 
-
-    const [dimensions, setDimensions] = useState({
-        window: windowsDimensions,
-        screen: screenDimensions,
+// LOGIN SCREEN
+function LoginScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      }
     });
+  }, [navigation]);
 
-    const { playing, setPlaying, looping, setLooping, trackSkipper, trackName } = musicPlayerHook();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image 
+          source={require('./assets/LPAMB.png')} 
+          style={styles.image} 
+        />
+        <Text style={styles.title}>L.A.M.B</Text>
+        <Text style={styles.subtitle}>La à Musix Box</Text>
 
-    useEffect(() => {
-      const listener = Dimensions.addEventListener(
-        'change', ({window, screen}) => {
-          setDimensions({window, screen});
-        },
-      );
-      return () => listener?.remove();
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
+        />
+        
+        <Pressable style={styles.button} onPress={() => console.log('Login pressed')}>
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+// REGISTER SCREEN
+function RegisterScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      }
     });
+  }, [navigation]);
 
-    useEffect(() => {
-        if (loaded || error) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded, error]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  return (
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image 
+          source={require('./assets/LPAMB.png')} 
+          style={styles.image} 
+        />
+        <Text style={styles.title}>L.A.M.B</Text>
+        <Text style={styles.subtitle}>La à Musix Box</Text>
 
-    useEffect(() => {
-      requestPerm();
-      NotifiPlayer(playing, setPlaying, looping, setLooping, trackSkipper, trackName);
-    }, [playing, looping, trackName]);
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
+        />
+        
+        <Pressable style={styles.button} onPress={() => console.log('Register pressed')}>
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
-    if (!loaded && !error) {
-        return null;
-    }
+// MUSIC SCREEN
+function MusicScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Welcome Home!',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      }
+    });
+  }, [navigation]);
 
+  const [searchText, setSearchText] = useState('');
 
-    return (
-      <GestureHandlerRootView>
-        <View style={styles.container}>
-          <NavigationContainer>
-            <Drawer.Navigator 
-              initialRouteName = "Home"
-              screenOptions={
-                {
-                  drawerStyle: {
-                    width: windowsDimensions.width * 0.5
-                  },
-                }
-              }
-            >
-              <Drawer.Screen name = "Home" component={Homescr} />
-              <Drawer.Screen name = "Detail" component={Bodyscr_1} />
-              <Drawer.Screen name = "Picture" component={Bodyscr_2} />
-              <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
-              <Drawer.Screen name = "Post Test" component={Bodyscr_3} />
-              <Drawer.Screen name = "Login screen" component={LoginScr} />
-              <Drawer.Screen name = "Dev portal" component={DevIpConfig} />
-            </Drawer.Navigator>
-          </NavigationContainer>
-          <PlayerScreen/>
-          <View>
-            <Text style={styles.text_dev_warn}>This is an experimental build and is not the final product. The build may be sujected to bugs or unexpected behaviours</Text>
-            <Text style={styles.text_dev_warn}>Tester is informed and advised.</Text>
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="What do you want to hear sweetheart?"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+      </View>
+      
+      <View style={styles.genreContainer}>
+        {['Jazz', 'Bass', 'Lo-fi', 'Pop', 'Rock'].map((genre, index) => (
+          <Pressable key={index} style={styles.genreButton}>
+            <Text style={styles.genreText}>{genre}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={styles.cardContainer}>
+        {Array(9).fill().map((_, index) => (
+          <View key={index} style={styles.card} />
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+// LIBRARY SCREEN
+function LibraryScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Your Library!',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      },
+      headerTitleStyle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#4A4A4A',
+      },
+    });
+  }, [navigation]);
+
+  const songs = [
+    { title: "I Don't Want to see tomorrow", artist: 'Nat King Cole', image: require('./assets/camel.png') },
+    // add song
+  ];
+
+  return (
+    <ScrollView contentContainerStyle={libraryStyles.container}>
+      {songs.map((song, index) => (
+        <View key={index} style={libraryStyles.songContainer}>
+          <Image source={song.image} style={libraryStyles.songImage} />
+          <View style={libraryStyles.songInfo}>
+            <Text style={libraryStyles.songTitle}>{song.title}</Text>
+            <Text style={libraryStyles.songArtist}>{song.artist}</Text>
           </View>
         </View>
-      </GestureHandlerRootView> 
-    );
+      ))}
+
+      {Array(10).fill().map((_, index) => (
+        <View key={index} style={libraryStyles.songContainer} />
+      ))}
+    </ScrollView>
+  );
 }
 
+const Drawer = createDrawerNavigator();
+
+// MAIN APP
+export default function App() {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Drawer.Navigator initialRouteName="Home">
+          <Drawer.Screen name="MENU" component={HomeScreen} />
+          <Drawer.Screen name="LOGIN" component={LoginScreen} />
+          <Drawer.Screen name="REGISTER" component={RegisterScreen} />
+          <Drawer.Screen name="GUESS" component={MusicScreen} />
+          <Drawer.Screen name="HOME" component={MusicScreen} />
+          <Drawer.Screen name="LIBRARY" component={LibraryScreen} />
+          <Drawer.Screen name="NOW PLAYING" component={NowPlayingScreen} /> 
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
+  );
+}
+
+// STYLES
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#d9d9d9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    alignItems: 'center',
+    marginBottom: 80,
   },
   image: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: 'rgba(1,1,1,0)',
-    resizeMode: 'contain',
-    imageRendering: 'pixelated',
+    width: 100,
+    height: 100,
+    marginBottom: 20,
   },
-  container_1: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  container_2: {
-    flex: 1,
-    backgroundColor: 'rgba(66,120,245,100)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text_1: {
-    textAlign: 'center',
-    fontFamily: 'Caudex',
+  title: {
     fontSize: 32,
-    margin: 32,
-    color: 'blue',
+    fontWeight: 'bold',
   },
-  text_2: {
-    textAlign: 'center',
-    fontFamily: 'Consola',
-    fontSize: 24,
-    margin: 32,
-    color: 'yellow',
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 20,
   },
-  scrollStyle: {
-    marginTop: 20,
-    width: '100%',
-    height: 150,
-    borderColor: 'white',
-    borderWidth: 1,
+  button: {
+    backgroundColor: colors.primary,
     padding: 10,
+    borderRadius: 10,
+    marginVertical: 10,
+    width: 200,
+    alignItems: 'center',
   },
-  text_scroll: {
+  buttonText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  input: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: 200,
+    borderColor: 'gray',
+    borderWidth: 1,
+    textAlign: 'center',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  searchInput: {
+    flex: 1,
+    height: 60,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 40,
+    backgroundColor: '#f5f5f5',
+  },
+  genreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  genreButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    height : 40,
+    justifyContent : 'center',
+    alignItems : 'center',
+    marginLeft : 20
+  },
+  genreText: {
     fontSize: 14,
-    fontFamily: 'Consola',
-    color: 'yellow',
+    color: '#fff',
   },
-  seperator: {
-    fontSize: 14,
-    fontFamily: 'Consola',
-    color: 'gray',
+  cardContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
   },
-  list_container: {
+  card: {
+    width: '30%',
+    height: 150,
+    backgroundColor: '#FFD700',
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  //nam Nowplaying screen style
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    width: '100%',
+    backgroundColor: '#FBCB3C',
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  albumContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  albumArt: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
     marginBottom: 10,
   },
-  text_dev_warn: {
-    fontSize: 12,
-    fontFamily: 'Consola',
-    color: 'orange',
-    textAlign: 'left',
-    padding: 4,
-  },
-  text_dev_issue: {
-    fontSize: 14,
-    fontFamily: 'Consola',
-    color: 'red',
-    textAlign: 'left',
-    padding: 4,
-  },
-});
-
-const presstableStyle = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    paddingHorizontal: 32,
-    borderRadius:4,
-    elevation: 0,
-    backgroundColor: 'transparent',
-  },
-  text: {
-    fontSize: 20,
-    lineHeight: 26,
+  songTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: 'orange',
+    textAlign: 'center'
+    
   },
-  button_scroll: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    paddingHorizontal: 24,
-    borderRadius:4,
-    elevation: 0,
-    backgroundColor: 'transparent',
-  },
-  text_scroll: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: 'orange',
+  artistName: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 
+  heartIcon: {
+    marginTop: 10,
+  },
+
+  controlsContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  progressBar: {
+    width: '80%',
+    height: 5,
+    backgroundColor: 'gray',
+    borderRadius: 2,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    width: '40%', // This can be dynamically adjusted based on progress
+    height: '100%',
+    backgroundColor: '#FBCB3C',
+  },
+  controlButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '60%',
+  },
+  nextSongsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  nextSongsContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+    justifyContent: 'center',
+  },
+  songCard: {
+    width: 120,
+    padding: 10,
+    height: 270,
+    marginRight: 10,
+    backgroundColor: '#FBCB3C',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  songCardImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  songCardTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  songCardArtist: {
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  removeIcon: {
+    marginTop: 10,
+  },
+  songCardEmpty: {
+    width: 120,
+    padding: 10,
+    height: 270,
+    marginRight: 10,
+    backgroundColor: '#FBCB3C',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
-const text_field = StyleSheet.create({
-  search: {
-    marginVertical: 8,
-    marginHorizontal: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    backgroundColor: 'white',
-    width: 300,
-  }
-})
-
-export default App;
+// Styles for LibraryScreen
+const libraryStyles = StyleSheet.create({
+  container: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    alignItems: 'center',
+    flex: 1
+  },
+  songContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFD700',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 10,
+    width: '90%',
+    height: 100,
+    marginBottom : 10,
+    marginTop : 10,
+  },
+  songImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  songInfo: {
+    flexDirection: 'column',
+  },
+  songTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  songArtist: {
+    fontSize: 14,
+    color: '#6D6D6D',
+  },
+});
