@@ -96,6 +96,7 @@ function TitleDisplay({trackName}) {
 
 const PlayController = () => {
     const { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName } = musicPlayerHook();
+    
     useEffect(() => {
         if (!isHandling && currentTrackID && instTrackID === null) {
             console.log('Checking if ID is ready... current state:', isIdReady);
@@ -105,6 +106,7 @@ const PlayController = () => {
         }
 
     }, [currentTrackID, instTrackID, isIdReady]);
+    
     return (
         <View>
             <View style={playControlButton.container}>
@@ -112,7 +114,17 @@ const PlayController = () => {
                     <Pressable
                     onPress={() => setLooping(!looping)}
                     >
-                        <Text style = {styles.text}>Loop: {looping ? "Yes" : "No"}</Text>
+                        {looping ? (
+                            <Image_reload
+                                src={require('../assets/texture/loop.png')}
+                                scale={1}
+                            />
+                        ) : (
+                            <Image_reload
+                                src={require('../assets/texture/loop_no.png')}
+                                scale={1}
+                            />
+                        )}
                     </Pressable>
                 </View>
                 <View style={playControlButton.item}>

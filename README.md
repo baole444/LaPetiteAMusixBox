@@ -7,7 +7,7 @@ Loop track and skip track.
 Playback is possible in background, allow you to listen to your favourite song while attending to other business.
 
 ## Server:
-This repo come with a `node.js` base server located in `Server` folder. To start the server, run `node server.js`
+This repo come with a `node.js` base server located in `Server` folder. To start the server, run `node server.js`.
 Some server database/port connection property can be find in `/config/connection.yml`
 
 ### connection.yml default:
@@ -32,7 +32,7 @@ server:
   config: 'config'
 ```
 #### Setup database:
-Here is a quick mysql file yo setup the tables use by database (You still need to add data yourself):
+Here is a quick mysql file to setup the tables use by database (You still need to add data yourself):
 
 ```sql
 use lpamb_track_data;
@@ -94,6 +94,6 @@ Server IP is store in a single length async storage key, the test app provided a
 >    The reason the above is invalid because axios call in the app start with `/` by default, if you wish to change this behaviour consider trimming for user or change axios route.
 
 ## Known issues:
-- A song without looping in background on empty queue may cause queue not next song not start due to remaining sound object.
+- A song without looping in background on empty queue may cause queue on next song not start due to remaining sound object.
 - Notification based player doesn't show up.
 - Marquee implement for Track title is not functioning (Likely due to library no longer supporting it).

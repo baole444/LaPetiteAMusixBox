@@ -2,12 +2,12 @@ import './gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as React from 'react';
 import axios from 'axios';
-import { View, Text, StyleSheet, Pressable, TextInput, Dimensions} from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Dimensions, AppState, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Image } from 'expo-image';
 import Image_reload from './Image_reload';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -18,6 +18,8 @@ import musicPlayerHook from './musicPlayer/music-player';
 import NotifiPlayer from './musicPlayer/notfiPlayer';
 import * as Notifications from 'expo-notifications';
 import DevIpConfig from './Sreens/devIp';
+import requestLPAMB from './axios/wrapperAxios';
+import BackgroundService from 'react-native-background-actions';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -135,7 +137,7 @@ function Bodyscr_4({navigation}) {
 
 const sendPlayRequest = async (track_id) => {
   asyncQueueManager.pushQueue(track_id);
-  console.log('Added to queue.');
+  console.log(`Added ${track_id} to queue.`);
 };
 
 
@@ -143,27 +145,18 @@ function Bodyscr_3() {
   const [trackList, setTrackData] = useState([]);
   const [keyword, setKeyword] = useState('');
 
-  const sendData = () => {
-    const data = keyword;
-    asyncQueueManager.seekIp().then(ip => {
-      if (ip) {
-        axios.post(ip + '/search', {data}).then(response => {
-          //console.log('Recieve response from server:', response.data);
-          
-          if (Array.isArray(response.data)) {
-              setTrackData(response.data);
+  const sendData = async () => {
+      const response = await requestLPAMB('post', '/search', {data: keyword});
+      try {
+          if (Array.isArray(response)) {
+              setTrackData(response);
           } else {
               setTrackData([]);
           }
-  
-  
-      }).catch(error => {
+      } catch(error) {
           console.log('Error: ', error.message);
           setTrackData([]);
-      });
-      }
-    })
-
+      };
   };
 
   return (
@@ -221,6 +214,64 @@ const requestPerm = async () => {
 }
 
 function App() {
+  const [count, setCount] = useState(0);
+  const appState = useRef(AppState.currentState);
+
+  const veryIntensiveTask = async (taskData) => {
+    const { delay } = taskData;
+    while (BackgroundService.isRunning()) {
+      // Update state
+      setCount((prevCount) => {
+        const newCount = prevCount + 1;
+        console.log('Count:', newCount); // Log the count to the console
+        return newCount;
+      });
+      // Sleep for the given delay (in milliseconds)
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  };
+
+  const options = {
+    taskName: 'ForegroundService',
+    taskTitle: 'Foreground Task Running',
+    taskDesc: 'This task runs in the background as a foreground service.',
+    taskIcon: {
+      name: 'ic_launcher', // Icon name for the notification
+      type: 'mipmap',
+    },
+    color: '#ff00ff',
+    linkingURI: 'yourapp://home', // Deep link to open the app when the notification is clicked
+    parameters: {
+      delay: 1000, // Run the task every 1 second
+    },
+  };
+
+  const startBackgroundTask = async () => {
+    try {
+      await BackgroundService.start(veryIntensiveTask, options);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const stopBackgroundTask = async () => {
+    await BackgroundService.stop();
+  };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        console.log('App has come to the foreground');
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+
     const [loaded, error] = useFonts({
         'Caudex': require('./assets/fonts/Caudex.ttf'),
         'Consola': require("./assets/fonts/Consola.ttf"),
@@ -260,6 +311,12 @@ function App() {
 
     return (
       <GestureHandlerRootView>
+        <View>
+          <Text>Test background task, watch number rise.</Text>
+          <Button title="Start Foreground Task" onPress={startBackgroundTask} />
+          <Button title="Stop Foreground Task" onPress={stopBackgroundTask} />
+          <Text>Count: {count}</Text>
+        </View>
         <View style={styles.container}>
           <NavigationContainer>
             <Drawer.Navigator 

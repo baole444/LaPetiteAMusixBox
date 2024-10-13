@@ -2,7 +2,7 @@
   "expo": {
     "name": "La Petite A Musix Box",
     "slug": "a_petite_a_musix_box",
-    "version": "1.0.0",
+    "version": "0.0.2",
     "orientation": "portrait",
     "icon": "./assets/texture/LPAMB.png",
     "userInterfaceStyle": "light",
@@ -18,6 +18,9 @@
         "UIBackgroundModes": [
           "audio"
         ]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
@@ -25,7 +28,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/texture/LPAMB.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "FOREGROUND_SERVICE",
+        "WAKE_LOCK"
+      ]
     },
     "web": {
       "favicon": "./assets/texture/LPAMB.png"
@@ -40,7 +47,9 @@
           ]
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-secure-store",
+      "expo-build-properties"
     ],
     "extra": {
       "eas": {
