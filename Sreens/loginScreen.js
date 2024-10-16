@@ -1,109 +1,150 @@
 
 import * as React from 'react';
-import axios from 'axios';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
+import requestLPAMB from '../axios/wrapperAxios';
+import secureStorageManager from '../secure-storage-manager';
+import { NavigationContainer } from '@react-navigation/native';
 
-function LoginScr () {
+const sendLoginDetail = async(email, password) => {
+    if (!email || !password) {
+        console.log('Password or Email missing, retunring...');
+        return;
+    }
+    try {
+        const data = JSON.parse(`{"email":"${email}", "password":"${password}"}`)
+        const response = await requestLPAMB('post', '/api/user/login', data);
+        
+        if (response) {
+          console.log(response);
+        }
+
+    } catch (e) {
+        console.log(`There was problem while login: ${e.message}`);
+    }
+}
+
+function LoginScr ({navigation}) {
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
     return (
-        <View>
+        <View style={styles.container}>
             <View>
-                <Text>Login to your LPAMB Account</Text>
+                <Text style={styles.text_1}>Login to your LPAMB Account</Text>
             </View>
             <View>
-                <Text>Email</Text>
+                <Text style={styles.text_2}>Email</Text>
                 <TextInput
+                    style={styles.input} 
                     placeholder="Enter email adress..."
                     value={email}
-                    onChangeText={setEmail}
+                    onEndEditing={setEmail}
                 />
-                <Text>Password</Text>
+                <Text style={styles.text_2}>Password</Text>
                 <TextInput
+                    style={styles.input} 
                     secureTextEntry={true}
                     placeholder="Enter password..."
                     value={password}
-                    onChangeText={setPassword}
+                    onEndEditing={setPassword}
                 />
+                <View style={styles.container}>
+                    <Pressable 
+                      style={presstableStyle.button}
+                      onPress={()=> sendLoginDetail(email, password)}
+                    >
+                      <Text style={presstableStyle.text}>Login</Text>
+                    </Pressable>
+                    <Text> </Text>
+                    <Pressable 
+                      style={presstableStyle.button}
+                      onPress={()=> navigation.navigate('Home')}
+                    >
+                      <Text style={presstableStyle.text}>Continue as guess</Text>
+                    </Pressable>
+                    <Text style={styles.text_2}>Don't have an account?</Text>
+                    <Pressable 
+                      style={presstableStyle.button}
+                      onPress={()=> navigation.navigate('Register')}
+                    >
+                      <Text style={presstableStyle.text}>Register</Text>
+                    </Pressable>
+                </View>
             </View>
         </View>
-
     );
 }
 
+function UserInfo({navigation}) {
+    const [ isSessionValid, setIsSessionValid] = useState(false);
+    const [ status, setStatus] = useState(0);
+
+    const sessionValidator = async () => {
+        const shortToken = await secureStorageManager.loadValue('shortToken');
+
+        if (shortToken) {
+            try {
+                const shortResponse = await requestLPAMB('post', '/api/user/session');
+
+            } catch (e) {
+                console.log(`Session under construction, ${e.message}`);
+            }
+        }
+    }
+
+    return (
+      <View style={styles.container}>
+          <View>
+              <Text style={styles.text_1}>Account info</Text>
+          </View>
+          <View>
+              <Text style={styles.text_2}>WIP account info page</Text>
+              <View style={styles.container}>
+                  <Text> </Text>
+                  <Text style={styles.text_2}>Don't have an account?</Text>
+                  <Pressable 
+                    style={presstableStyle.button}
+                    onPress={()=> navigation.navigate('Register')}
+                  >
+                    <Text style={presstableStyle.text}>Register</Text>
+                  </Pressable>
+              </View>
+          </View>
+      </View>
+    );
+}
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    image: {
-      flex: 1,
-      width: '100%',
-      backgroundColor: 'rgba(1,1,1,0)',
-      resizeMode: 'contain',
-      imageRendering: 'pixelated',
-    },
     container_1: {
       flex: 1,
       backgroundColor: '#fff',
       alignItems: 'center',
       justifyContent: 'center',
     },
-    container_2: {
+    container: {
       flex: 1,
       backgroundColor: 'rgba(66,120,245,100)',
       alignItems: 'center',
-      justifyContent: 'center',
+      padding: 20,
     },
     text_1: {
       textAlign: 'center',
       fontFamily: 'Caudex',
-      fontSize: 32,
-      margin: 32,
-      color: 'blue',
+      fontSize: 24,
+      margin: 20,
+      color: 'orange',
     },
     text_2: {
-      textAlign: 'center',
-      fontFamily: 'Consola',
-      fontSize: 24,
-      margin: 32,
+      textAlign: 'left',
+      fontSize: 20,
       color: 'yellow',
-    },
-    scrollStyle: {
       marginTop: 20,
-      width: '100%',
-      height: 150,
-      borderColor: 'white',
-      borderWidth: 1,
+    },
+    input: {
+      width: 250,
+      backgroundColor: 'white',
+      height: 40,
       padding: 10,
-    },
-    text_scroll: {
-      fontSize: 14,
-      fontFamily: 'Consola',
-      color: 'yellow',
-    },
-    seperator: {
-      fontSize: 14,
-      fontFamily: 'Consola',
-      color: 'gray',
-    },
-    list_container: {
-      marginBottom: 10,
-    },
-    text_dev_warn: {
-      fontSize: 12,
-      fontFamily: 'Consola',
-      color: 'orange',
-      textAlign: 'left',
-      padding: 4,
-    },
-    text_dev_issue: {
-      fontSize: 14,
-      fontFamily: 'Consola',
-      color: 'red',
-      textAlign: 'left',
-      padding: 4,
     },
   });
   
@@ -111,17 +152,17 @@ const styles = StyleSheet.create({
     button: {
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 12,
-      paddingHorizontal: 32,
-      borderRadius:4,
+      padding: 10,
+      borderRadius: 1,
       elevation: 0,
-      backgroundColor: 'transparent',
+      backgroundColor: 'orange',
+      width: 200,
     },
     text: {
       fontSize: 20,
       lineHeight: 26,
       fontWeight: 'bold',
-      color: 'orange',
+      color: 'white',
     },
     button_scroll: {
       alignItems: 'center',
@@ -130,14 +171,8 @@ const styles = StyleSheet.create({
       paddingHorizontal: 24,
       borderRadius:4,
       elevation: 0,
-      backgroundColor: 'transparent',
-    },
-    text_scroll: {
-      fontSize: 12,
-      lineHeight: 18,
-      color: 'orange',
-    },
-  
+      backgroundColor: 'orange',
+    },  
   });
 
   export default LoginScr;

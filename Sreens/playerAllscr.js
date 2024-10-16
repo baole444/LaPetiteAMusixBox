@@ -1,13 +1,12 @@
 import { View, Text, StyleSheet, Pressable, Alert, TextInput } from 'react-native';
-import musicPlayerHook from '../musicPlayer/music-player';
 import PlayController from '../musicPlayer/playerButton';
+import musicPlayerHook from '../musicPlayer/music-player';
 
 function PlayerScreen() {
-    const { playing, setPlaying } = musicPlayerHook();
 
     return (
         <View style={styles.container}>
-            <PlayController playing={playing} setPlaying={setPlaying} />
+            <PlayController/>
         </View>
     );
 

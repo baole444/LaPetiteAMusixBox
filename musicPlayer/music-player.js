@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import requestLPAMB from "../axios/wrapperAxios";
 
+// Will be depercated soon
+
 const musicPlayerHook = () => {
     const [sound, setSound] = useState(null);
     const [playing, setPlaying] = useState(false);
@@ -73,6 +75,17 @@ const musicPlayerHook = () => {
     
     const trackHandler = async () => {
 
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            playsInSilentModeIOS: true,
+            interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+            interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+            playThroughEarpieceAndroid: false,
+            shouldDuckAndroid: false,
+            staysActiveInBackground: true,
+        })
+
+
         console.log('Handling trackID: ',currentTrackID); // Log to verify trackID passed in
         if (!currentTrackID) {
             console.log("trackID is undefined. Aborting track load.");
@@ -89,18 +102,6 @@ const musicPlayerHook = () => {
         if (newTrack) {
             console.log('Track loaded successfully.');
             setSound(newTrack);
-            if (sound) {
-                await Audio.setAudioModeAsync({
-                    allowsRecordingIOS: false,
-                    playsInSilentModeIOS: true,
-                    interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-                    interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-                    playThroughEarpieceAndroid: false,
-                    shouldDuckAndroid: false,
-                    staysActiveInBackground: false,
-                })
-            }
-
 
             if (playing) {
                 console.log('Starting playback...');
@@ -171,6 +172,15 @@ const musicPlayerHook = () => {
             await sound.setPositionAsync(instPos);
         }
     };
+
+    useEffect(() => {
+        if (!isHandling && currentTrackID && instTrackID === null) {
+            console.log('Checking if ID is ready... current state:', isIdReady);
+            if (isIdReady) {
+                trackHandler();
+            }
+        }
+    }, [currentTrackID, instTrackID, isIdReady]);
 
 
     useEffect(() => {

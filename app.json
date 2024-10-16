@@ -1,13 +1,14 @@
 {
   "expo": {
+    "scheme": "lpamb",
     "name": "La Petite A Musix Box",
-    "slug": "a_petite_a_musix_box",
-    "version": "0.0.2",
+    "slug": "la_petite_a_musix_box",
+    "version": "0.0.3",
     "orientation": "portrait",
-    "icon": "./assets/texture/LPAMB.png",
+    "icon": "./assets/texture/lpamb_icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/texture/TCB icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -26,7 +27,7 @@
     "android": {
       "package": "arsky.LPAMB.player",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/texture/LPAMB.png",
+        "foregroundImage": "./assets/texture/lpamb_icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -35,7 +36,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/texture/LPAMB.png"
+      "favicon": "./assets/texture/lpamb_icon.png"
     },
     "plugins": [
       [
@@ -53,8 +54,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "d6ff398d-7350-4a7e-b9d7-b3c579bcbf21"
+        "projectId": "fa632e25-a900-4efc-8635-e29375c94fa8"
       }
-    }
+    },
+    "owner": "baole444"
   }
 }
