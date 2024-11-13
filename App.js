@@ -1,3 +1,12 @@
+<<<<<<< Updated upstream
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { FontAwesome } from '@expo/vector-icons'; // For heart, play, pause, shuffle, repeat, etc.
+import { colors } from './Server/constants';
+=======
 import './gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as React from 'react';
@@ -21,109 +30,190 @@ SplashScreen.preventAutoHideAsync();
 
 function Homescr({navigation}) {
   return (
-    <View style = {styles.container_1}>
-      <Text style = {styles.text_1}>LPAMB Test App</Text>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Detail')}
-      >
-        <Text style={presstableStyle.text}>Next Page</Text>
+    <View style={styles.container}>
+      {/* Header */}
+      
 
-      </Pressable>
+      {/* Album Art and Song Info */}
+      <View style={styles.albumContainer}>
+        <Image
+          source={require('./assets/brenda-lee.png')}
+          style={styles.albumArt}
+        />
+        <Text style={styles.songTitle}>If You Love Me (Really Love Me) <FontAwesome name="heart" size={24} color="gray" style={styles.heartIcon} /></Text>
+        <Text style={styles.artistName}>Brenda Lee </Text>
+        
+      </View>
+
+      {/* Progress Bar and Controls */}
+      <View style={styles.controlsContainer}>
+        <View style={styles.progressBar}>
+          <View style={styles.progressFill} />
+        </View>
+
+        {/* Shuffle, Repeat and Playback Buttons */}
+        <View style={styles.controlButtons}>
+          <Pressable onPress={toggleShuffle}>
+            <FontAwesome
+              name="random"
+              size={24}
+              color={isShuffling ? colors.primary : 'gray'}
+            />
+          </Pressable>
+
+          <FontAwesome name="backward" size={24} color="black" />
+
+          <Pressable onPress={togglePlayPause}>
+            {isPlaying ? (
+              <FontAwesome name="pause" size={24} color="black" />
+            ) : (
+              <FontAwesome name="play" size={24} color="black" />
+            )}
+          </Pressable>
+
+          <FontAwesome name="forward" size={24} color="black" />
+
+          <Pressable onPress={toggleRepeat}>
+            <FontAwesome
+              name="repeat"
+              size={24}
+              color={isRepeating ? colors.primary : 'gray'}
+            />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Next Songs */}
+      <Text style={styles.nextSongsTitle}>Next songs:</Text>
+      <ScrollView horizontal contentContainerStyle={styles.nextSongsContainer}>
+        <View style={styles.songCard}>
+          <Image
+            source={require('./assets/camel.png')}
+            style={styles.songCardImage}
+          />
+          <Text style={styles.songCardTitle}>I Don’t Want to See Tomorrow</Text>
+          <Text style={styles.songCardArtist}>Nat King Cole</Text>
+          <FontAwesome name="times" size={24} color="black" style={styles.removeIcon} />
+        </View>
+
+        {/* Add more song cards here */}
+        <View style={styles.songCardEmpty} />
+        <View style={styles.songCardEmpty} />
+      </ScrollView>
     </View>
   );
 }
 
 function Bodyscr_1({navigation}) {
   return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>This is A detail screen</Text>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
-
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Picture')}
-      >
-        <Text style={presstableStyle.text}>View Image</Text>
-
-      </Pressable>
-
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => asyncQueueManager.dumpQueueData()}
-      >
-        <Text style={presstableStyle.text}>Dump async storage queue to log</Text>
-
-      </Pressable>
-
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => asyncQueueManager.clearQueue()}
-      >
-        <Text style={presstableStyle.text}>Clear queue</Text>
-
-      </Pressable>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image 
+          source={require('./assets/LPAMB.png')} 
+          style={styles.image} 
+        />
+        <Text style={styles.title}>L.A.M.B</Text>
+        <Text style={styles.subtitle}>La à Musix Box</Text>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('GUESS')}>
+          <Text style={styles.buttonText}>Continue as a Guest</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('LOGIN')}>
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('REGISTER')}>
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
-function Bodyscr_2({navigation}) {
+// LOGIN SCREEN
+function LoginScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      }
+    });
+  }, [navigation]);
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Expo Image library test</Text>
-      <Image 
-        style = {styles.image}
-        placeholder={require('./assets/texture/TCB icon.png')}
-        placeholderContentFit='contain'
-        source={require('./assets/texture/Arsky flag.png')}
-        contentFit='contain'
-        transition={1000}
-      />
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image 
+          source={require('./assets/LPAMB.png')} 
+          style={styles.image} 
+        />
+        <Text style={styles.title}>L.A.M.B</Text>
+        <Text style={styles.subtitle}>La à Musix Box</Text>
 
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('LPAMB')}
-      >
-        <Text style={presstableStyle.text}>LPAMB</Text>
-
-      </Pressable>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
+        />
+        
+        <Pressable style={styles.button} onPress={() => console.log('Login pressed')}>
+          <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
-function Bodyscr_4({navigation}) {
+// REGISTER SCREEN
+function RegisterScreen({ navigation }) {
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerStyle: {
+        backgroundColor: colors.primary,
+      }
+    });
+  }, [navigation]);
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   return (
-    <View style = {styles.container_2}>
-      <Text style = {styles.text_2}>Image Reload via skia canvas test</Text>
-      <Image_reload
-        src={require('./assets/texture/LPAMB.png')}
-        scale={2}
-      />
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={presstableStyle.text}>Home</Text>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Image 
+          source={require('./assets/LPAMB.png')} 
+          style={styles.image} 
+        />
+        <Text style={styles.title}>L.A.M.B</Text>
+        <Text style={styles.subtitle}>La à Musix Box</Text>
 
-      </Pressable>
-      <Pressable 
-        style={presstableStyle.button}
-        onPress={() => navigation.navigate('Post Test')}
-      >
-        <Text style={presstableStyle.text}>To Post test</Text>
-
-      </Pressable>
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
+        />
+        
+        <Pressable style={styles.button} onPress={() => console.log('Register pressed')}>
+          <Text style={styles.buttonText}>Register</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -200,6 +290,13 @@ function App() {
               <Drawer.Screen name = "LPAMB" component={Bodyscr_4} />
               <Drawer.Screen name = "Post Test" component={SearchScreen} />
               <Drawer.Screen name = "Login screen" component={LoginScr} />
+              <Drawer.Screen name="MENU" component={HomeScreen} />
+              <Drawer.Screen name="LOGIN" component={LoginScreen} />
+              <Drawer.Screen name="REGISTER" component={RegisterScreen} />
+              <Drawer.Screen name="GUESS" component={MusicScreen} />
+              <Drawer.Screen name="HOME" component={MusicScreen} />
+              <Drawer.Screen name="LIBRARY" component={LibraryScreen} />
+              <Drawer.Screen name="NOW PLAYING" component={NowPlayingScreen} /> 
               <Drawer.Screen name = "Dev portal" component={DevIpConfig} />
             </Drawer.Navigator>
           </NavigationContainer>
@@ -207,18 +304,257 @@ function App() {
         </View>
       </GestureHandlerRootView> 
     );
+>>>>>>> Stashed changes
 }
 
+// STYLES
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#d9d9d9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    alignItems: 'center',
+    marginBottom: 80,
+  },
+  content: {
+    alignItems: 'center',
+    marginBottom: 80,
   },
   image: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  title: {
+<<<<<<< Updated upstream
+=======
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: colors.primary,
+    padding: 10,
+    borderRadius: 10,
+    marginVertical: 10,
+    width: 200,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  input: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: 200,
+    borderColor: 'gray',
+    borderWidth: 1,
+    textAlign: 'center',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  searchInput: {
     flex: 1,
+    height: 60,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 40,
+    backgroundColor: '#f5f5f5',
+  },
+  genreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  genreButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    height : 40,
+    justifyContent : 'center',
+    alignItems : 'center',
+    marginLeft : 20
+  },
+  genreText: {
+    fontSize: 14,
+    color: '#fff',
+  },
+  cardContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  card: {
+    width: '30%',
+    height: 150,
+    backgroundColor: '#FFD700',
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  //nam Nowplaying screen style
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
     width: '100%',
-    backgroundColor: 'rgba(1,1,1,0)',
-    resizeMode: 'contain',
-    imageRendering: 'pixelated',
+    backgroundColor: '#FBCB3C',
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  albumContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  albumArt: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  songTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center'
+    
+  },
+  artistName: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+
+  heartIcon: {
+    marginTop: 10,
+  },
+
+  controlsContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  progressBar: {
+    width: '80%',
+    height: 5,
+    backgroundColor: 'gray',
+    borderRadius: 2,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    width: '40%', // This can be dynamically adjusted based on progress
+    height: '100%',
+    backgroundColor: '#FBCB3C',
+  },
+  controlButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '60%',
+  },
+  nextSongsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  nextSongsContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+    justifyContent: 'center',
+  },
+  songCard: {
+    width: 120,
+    padding: 10,
+    height: 270,
+    marginRight: 10,
+    backgroundColor: '#FBCB3C',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  songCardImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  songCardTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  songCardArtist: {
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  removeIcon: {
+    marginTop: 10,
+  },
+  songCardEmpty: {
+    width: 120,
+    padding: 10,
+    height: 270,
+    marginRight: 10,
+    backgroundColor: '#FBCB3C',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+// Styles for LibraryScreen
+const libraryStyles = StyleSheet.create({
+  container: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    alignItems: 'center',
+    flex: 1
+  },
+  songContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFD700',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 10,
+    width: '90%',
+    height: 100,
+    marginBottom : 10,
+    marginTop : 10,
+  },
+  songImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  songInfo: {
+    flexDirection: 'column',
+  },
+  songTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  songArtist: {
+    fontSize: 14,
+    color: '#6D6D6D',
   },
   container_1: {
     flex: 1,
@@ -235,96 +571,230 @@ const styles = StyleSheet.create({
   text_1: {
     textAlign: 'center',
     fontFamily: 'Caudex',
+>>>>>>> Stashed changes
     fontSize: 32,
-    margin: 32,
-    color: 'blue',
+    fontWeight: 'bold',
   },
-  text_2: {
-    textAlign: 'center',
-    fontFamily: 'Consola',
-    fontSize: 24,
-    margin: 32,
-    color: 'yellow',
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 20,
   },
-  scrollStyle: {
-    marginTop: 20,
-    width: '100%',
-    height: 150,
-    borderColor: 'white',
-    borderWidth: 1,
+  button: {
+    backgroundColor: colors.primary,
     padding: 10,
+    borderRadius: 10,
+    marginVertical: 10,
+    width: 200,
+    alignItems: 'center',
   },
-  text_scroll: {
+  buttonText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  input: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: 200,
+    borderColor: 'gray',
+    borderWidth: 1,
+    textAlign: 'center',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  searchInput: {
+    flex: 1,
+    height: 60,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 40,
+    backgroundColor: '#f5f5f5',
+  },
+  genreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  genreButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    height : 40,
+    justifyContent : 'center',
+    alignItems : 'center',
+    marginLeft : 20
+  },
+  genreText: {
     fontSize: 14,
-    fontFamily: 'Consola',
-    color: 'yellow',
+    color: '#fff',
   },
-  seperator: {
-    fontSize: 14,
-    fontFamily: 'Consola',
-    color: 'gray',
+  cardContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
   },
-  list_container: {
+  card: {
+    width: '30%',
+    height: 150,
+    backgroundColor: '#FFD700',
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  //nam Nowplaying screen style
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    width: '100%',
+    backgroundColor: '#FBCB3C',
+    paddingHorizontal: 20,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  albumContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  albumArt: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
     marginBottom: 10,
   },
-  text_dev_warn: {
-    fontSize: 12,
-    fontFamily: 'Consola',
-    color: 'orange',
-    textAlign: 'left',
-    padding: 4,
-  },
-  text_dev_issue: {
-    fontSize: 14,
-    fontFamily: 'Consola',
-    color: 'red',
-    textAlign: 'left',
-    padding: 4,
-  },
-});
-
-const presstableStyle = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    paddingHorizontal: 32,
-    borderRadius:4,
-    elevation: 0,
-    backgroundColor: 'transparent',
-  },
-  text: {
-    fontSize: 20,
-    lineHeight: 26,
+  songTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: 'orange',
+    textAlign: 'center'
+    
   },
-  button_scroll: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    paddingHorizontal: 24,
-    borderRadius:4,
-    elevation: 0,
-    backgroundColor: 'transparent',
-  },
-  text_scroll: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: 'orange',
+  artistName: {
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 
+  heartIcon: {
+    marginTop: 10,
+  },
+
+  controlsContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  progressBar: {
+    width: '80%',
+    height: 5,
+    backgroundColor: 'gray',
+    borderRadius: 2,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    width: '40%', // This can be dynamically adjusted based on progress
+    height: '100%',
+    backgroundColor: '#FBCB3C',
+  },
+  controlButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '60%',
+  },
+  nextSongsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  nextSongsContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+    justifyContent: 'center',
+  },
+  songCard: {
+    width: 120,
+    padding: 10,
+    height: 270,
+    marginRight: 10,
+    backgroundColor: '#FBCB3C',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  songCardImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  songCardTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  songCardArtist: {
+    fontSize: 12,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  removeIcon: {
+    marginTop: 10,
+  },
+  songCardEmpty: {
+    width: 120,
+    padding: 10,
+    height: 270,
+    marginRight: 10,
+    backgroundColor: '#FBCB3C',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
-const text_field = StyleSheet.create({
-  search: {
-    marginVertical: 8,
-    marginHorizontal: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    backgroundColor: 'white',
-    width: 300,
-  }
-})
-
-export default App;
+// Styles for LibraryScreen
+const libraryStyles = StyleSheet.create({
+  container: {
+    padding: 10,
+    backgroundColor: '#e0e0e0',
+    alignItems: 'center',
+    flex: 1
+  },
+  songContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFD700',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 10,
+    width: '90%',
+    height: 100,
+    marginBottom : 10,
+    marginTop : 10,
+  },
+  songImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  songInfo: {
+    flexDirection: 'column',
+  },
+  songTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  songArtist: {
+    fontSize: 14,
+    color: '#6D6D6D',
+  },
+});
