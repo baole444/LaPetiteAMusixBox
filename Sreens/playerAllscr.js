@@ -3,7 +3,6 @@ import PlayController from '../musicPlayer/playerButton';
 import musicPlayerHook from '../musicPlayer/music-player';
 
 function PlayerScreen() {
-
     return (
         <View style={styles.container}>
             <PlayController/>
