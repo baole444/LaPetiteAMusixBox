@@ -5,6 +5,8 @@ import musicPlayerHook from "./music-player";
 import Slider from '@react-native-community/slider';
 import Carousel from "react-native-reanimated-carousel";
 import Image_reload from "../Image_reload";
+import useNotifiPlayer from "./notfiPlayer";
+import { AppState } from "react-native";
 
 const pageWidth = Dimensions.get('window').width;
 
@@ -96,15 +98,29 @@ function TitleDisplay({trackName}) {
 
 const PlayController = () => {
     const { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName } = musicPlayerHook();
-    useEffect(() => {
-        if (!isHandling && currentTrackID && instTrackID === null) {
-            console.log('Checking if ID is ready... current state:', isIdReady);
-            if (isIdReady) {
-                trackHandler();
-            }
-        }
+    
+    const [ loadState, setLoadState ] = useState(false);
 
-    }, [currentTrackID, instTrackID, isIdReady]);
+    const { makeNotifiPlayer, endNotifiPlayer } = useNotifiPlayer(playing, setPlaying, looping, setLooping, trackSkipper, trackName);
+
+    useEffect(() => {
+        const event = AppState.addEventListener('change', (nexAppState) => {
+
+            if (nexAppState === 'active' && !loadState) {
+                console.log('Starting notification embeded player.');
+                makeNotifiPlayer();
+                setLoadState(true);
+            }
+        });
+
+        return () => {
+            console.log('Ending notification embeded player');
+            endNotifiPlayer();
+            event.remove();
+            setLoadState(false);
+        }
+    }, []);
+
     return (
         <View>
             <View style={playControlButton.container}>
@@ -112,7 +128,17 @@ const PlayController = () => {
                     <Pressable
                     onPress={() => setLooping(!looping)}
                     >
-                        <Text style = {styles.text}>Loop: {looping ? "Yes" : "No"}</Text>
+                        {looping ? (
+                            <Image_reload
+                                src={require('../assets/texture/loop.png')}
+                                scale={1}
+                            />
+                        ) : (
+                            <Image_reload
+                                src={require('../assets/texture/loop_no.png')}
+                                scale={1}
+                            />
+                        )}
                     </Pressable>
                 </View>
                 <View style={playControlButton.item}>
@@ -159,7 +185,6 @@ const PlayController = () => {
                     <Text style={title.title_text}>{instTrackID === null ? "None" : trackName}</Text>
                 </View>
             </View>
-
         </View>
     );
 }

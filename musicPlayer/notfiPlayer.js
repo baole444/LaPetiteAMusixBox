@@ -1,27 +1,28 @@
 import * as Notifications from 'expo-notifications'
-import { AppState } from "react-native";
+import { useState, useEffect } from 'react';
 
-const NotifiPlayer = async (playing, setPlaying, looping, setLooping, trackSkipper, trackName) => {
+const NotifiPlayer = (playing, setPlaying, looping, setLooping, trackSkipper, trackName) => {
 
+    const setNotifiCat= async() => {
+        await Notifications.setNotificationCategoryAsync('music-control', [
+            {
+                identifier: 'loop', 
+                buttonTitle: looping ? "Stop loop" : "Loop",
+                options: {isDestructive: false, isAuthenticationRequired: false},
+            },
+            {
+                identifier: 'play',
+                buttonTitle: playing ? "Pause" : "Play",
+                options: {isDestructive: false, isAuthenticationRequired: false},
+            },
+            {
+                identifier: 'skip',
+                buttonTitle: 'Skip',
+                options: {isDestructive: false, isAuthenticationRequired: false},
+            },
+        ]);
+    }
     
-    await Notifications.setNotificationCategoryAsync('music-control', [
-        {
-            identifier: 'loop', 
-            buttonTitle: looping ? "Stop loop" : "Loop",
-            options: {isDestructive: false, isAuthenticationRequired: false},
-        },
-        {
-            identifier: 'play',
-            buttonTitle: playing ? "Pause" : "Play",
-            options: {isDestructive: false, isAuthenticationRequired: false},
-        },
-        {
-            identifier: 'skip',
-            buttonTitle: 'Skip',
-            options: {isDestructive: false, isAuthenticationRequired: false},
-        },
-    ]);
-
     const makeNotifiPlayer = async () => {
         const schedulResult = await Notifications.scheduleNotificationAsync({
             content: {
@@ -39,34 +40,32 @@ const NotifiPlayer = async (playing, setPlaying, looping, setLooping, trackSkipp
         await Notifications.dismissAllNotificationsAsync();
     }
 
-    AppState.addEventListener('change', (nextAppState) => {
-        console.log('App state changed to:', nextAppState);
-        if (nextAppState === 'active' || nextAppState === 'background') {
-            makeNotifiPlayer();
-        } else if (nextAppState === 'inactive') {
-            endNotifiPlayer();
-        }
-    });
+    const notifiListener = async() => {
+        Notifications.addNotificationResponseReceivedListener(response => {
+            const action = response.actionIdentifier;
+            console.log('setting listener...');
+            switch (action) {
+                case 'play':
+                    setPlaying(!playing);
+                    break;
+                case 'loop':
+                    setLooping(!looping);
+                    break;
+                case 'skip':
+                    trackSkipper();
+                    break;
+                default:
+                    break;
+            }
+        });
+    } 
 
-    Notifications.addNotificationResponseReceivedListener(response => {
-        const action = response.actionIdentifier;
+    useEffect(() => {
+        setNotifiCat();
+        notifiListener();        
+    }, [playing, looping])
 
-        switch (action) {
-            case 'play':
-                setPlaying(!playing);
-                break;
-            case 'loop':
-                setLooping(!looping);
-                break;
-            case 'skip':
-                trackSkipper();
-                break;
-            default:
-                break;
-        }
-    });
-
-    await makeNotifiPlayer();
+    return { makeNotifiPlayer, endNotifiPlayer };
 }
 
 export default NotifiPlayer;

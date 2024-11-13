@@ -1,7 +1,9 @@
 import asyncQueueManager from "../async-queue-manager";
 import { useState, useEffect } from 'react';
-import axios from "axios";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import requestLPAMB from "../axios/wrapperAxios";
+
+// Will be depercated soon
 
 const musicPlayerHook = () => {
     const [sound, setSound] = useState(null);
@@ -72,15 +74,17 @@ const musicPlayerHook = () => {
     }
     
     const trackHandler = async () => {
-        Audio.setAudioModeAsync({
-            staysActiveInBackground: true,
+
+        await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
-            interruptionModeIOS: InterruptionModeIOS.DoNotMix,
             playsInSilentModeIOS: true,
-            shouldDuckAndroid: true,
             interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+            interruptionModeIOS: InterruptionModeIOS.DoNotMix,
             playThroughEarpieceAndroid: false,
-        });
+            shouldDuckAndroid: false,
+            staysActiveInBackground: true,
+        })
+
 
         console.log('Handling trackID: ',currentTrackID); // Log to verify trackID passed in
         if (!currentTrackID) {
@@ -98,7 +102,6 @@ const musicPlayerHook = () => {
         if (newTrack) {
             console.log('Track loaded successfully.');
             setSound(newTrack);
-
 
             if (playing) {
                 console.log('Starting playback...');
@@ -170,6 +173,15 @@ const musicPlayerHook = () => {
         }
     };
 
+    useEffect(() => {
+        if (!isHandling && currentTrackID && instTrackID === null) {
+            console.log('Checking if ID is ready... current state:', isIdReady);
+            if (isIdReady) {
+                trackHandler();
+            }
+        }
+    }, [currentTrackID, instTrackID, isIdReady]);
+
 
     useEffect(() => {
         return () => {
@@ -201,32 +213,30 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
         return { newTrack: null, trackId: null };
     }
     try {
-        const ip = await asyncQueueManager.seekIp();
-        if (ip) {
-            const response = await axios.post(ip + '/api/response/play', {data: trackID}, {responseType: 'arraybuffer'});
-            if (response && response.data) {
-                const base64String = arrayBufferToBase64(response.data);
-                const trackUrl = `data:audio/mpeg;base64,${base64String}`;
-    
-                // Unload current sound if request to play another track
-                if (sound) {
-                    await sound.unloadAsync();
-                    setSound(null);
-                }
-    
-                // Create new sound instance
-                const { sound: newTrack } = await Audio.Sound.createAsync(
-                    { uri: trackUrl },
-                    { shouldPlay: false }
-                );
-                setInstTrackID(trackID);
-                //console.log('New track generated: ', newTrack);
-                return { newTrack, trackId: trackID }
-    
-            } else {
-                console.warn('Response empty!');
-                return { newTrack: null, trackId: null };
+        const response = await requestLPAMB('post', '/api/response/play', {data: trackID});
+        if (response) {
+            const base64String = arrayBufferToBase64(response);
+            const trackUrl = `data:audio/mpeg;base64,${base64String}`;
+
+            // Unload current sound if request to play another track
+            if (sound) {
+                await sound.unloadAsync();
+                setSound(null);
             }
+
+            // Create new sound instance
+            const { sound: newTrack } = await Audio.Sound.createAsync(
+                { uri: trackUrl },
+                { shouldPlay: false }
+            );
+            setInstTrackID(trackID);
+ 
+            //console.log('New track generated: ', newTrack);
+            return { newTrack, trackId: trackID }
+
+        } else {
+            console.warn('Response empty!');
+            return { newTrack: null, trackId: null };
         }
     } catch (e) {
         console.warn('Cannot load track with error: ', e.message);
@@ -240,17 +250,13 @@ const loadName = async (id, setTrackName) => {
         setTrackName('Error: Failed to query for title')
     }
     try {
-        const ip = await asyncQueueManager.seekIp();
-        if (ip) {
-            const response = await axios.post(ip + '/api/response/title', {data: id});
-            
-            if (response && response.data) {
-                console.log(`Title is: ${response.data}`)
-                setTrackName(response.data);
-            } else {
-                console.warn('Response empty!');
-                setTrackName('Error: Failed to query for title')
-            }
+        const response = await requestLPAMB('post', '/api/response/title', {data: id});
+        if (response) {
+            console.log(`Title is: ${response}`)
+            setTrackName(response);
+        } else {
+            console.warn('Response empty!');
+            setTrackName('Error: Failed to query for title')
         }
 
     } catch (e) {
