@@ -149,6 +149,7 @@ const deletePlaylistItem = async (trackId) => {
 
 
 export default {
+    readQueue,
     pushQueue,
     currentTrack,
     seekTrack,

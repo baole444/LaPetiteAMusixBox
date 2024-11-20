@@ -64,14 +64,27 @@ const PlayController = () => {
                     <Pressable
                     onPress={() => setPlaying(!playing)}
                     >
-                        <Text style = {styles.text}>{playing ? "Pause" : "Play"}</Text>
+                        {playing ? (
+                            <Image_reload
+                                src={require('../assets/texture/pause.png')}
+                                scale={0.5}
+                            />
+                        ) : (
+                            <Image_reload
+                                src={require('../assets/texture/play.png')}
+                                scale={0.5}
+                            />
+                        )}
                     </Pressable>
                 </View>
                 <View style={playControlButton.item}>
                     <Pressable
                     onPress={() => trackSkipper()}
                     >
-                        <Text style = {styles.text}>Skip</Text>
+                            <Image_reload
+                                src={require('../assets/texture/skip.png')}
+                                scale={0.5}
+                            />
                     </Pressable>
                 </View>
             </View>

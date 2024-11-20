@@ -4,7 +4,7 @@ import { colors } from '../Server/constants';
 import asyncQueueManager from '../async-queue-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlatList } from 'react-native-gesture-handler';
-
+import { useFocusEffect } from '@react-navigation/native';
 const sendPlayRequest = async (track_id) => {
   asyncQueueManager.pushQueue(track_id);
   console.log(`Added ${track_id} to queue.`);
@@ -21,6 +21,26 @@ function LibraryScreen({ navigation }) {
     loadPlaylist();
 
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+
+      const initializePlaylist = async () => {
+        try {
+          const data = await asyncQueueManager.readPlaylist();
+          setPlaylist(data || []);
+        } catch (error) {
+          console.error('Error initializing queue:', error);
+        }
+      };
+  
+      initializePlaylist();
+
+      return () => {
+
+      };
+    }, []) 
+  );
 
   const deleteTrackItem =async (track_id) => {
     try {
