@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
@@ -7,25 +6,25 @@ import secureStorageManager from '../secure-storage-manager';
 import { NavigationContainer } from '@react-navigation/native';
 import { colors } from '../Server/constants';
 
-const sendLoginDetail = async(email, password) => {
+const sendRegisterDetail = async(email, username, password) => {
     if (!email || !password) {
         console.log('Password or Email missing, retunring...');
         return;
     }
     try {
-        const data = JSON.parse(`{"email":"${email}", "password":"${password}"}`)
-        const response = await requestLPAMB('post', '/api/user/login', data);
+        const data = JSON.parse(`{"email":"${email}", "username":"${username}", "password":"${password}"}`)
+        const response = await requestLPAMB('post', '/api/user/register', data);
         
         if (response) {
           console.log(response);
         }
 
     } catch (e) {
-        console.log(`There was problem while login: ${e.message}`);
+        console.log(`There was problem while register: ${e.message}`);
     }
 }
 
-function LoginScr ({navigation}) {
+function RegisterScr ({navigation}) {
   useEffect(() => {
     navigation.setOptions({
       headerTitle: '',
@@ -37,11 +36,13 @@ function LoginScr ({navigation}) {
 
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
+    const [username, setUsername] = useState(null);
+
     return (
         <View style={styles.container}>
             <View>
                 <Text style={styles.title}> L.P.A.M.B </Text>
-                <Text style={styles.subtitle}>Account login</Text>
+                <Text style={styles.subtitle}>Account register</Text>
             </View>
             <View>
                 <Text style={styles.helperText}>Email</Text>
@@ -51,6 +52,13 @@ function LoginScr ({navigation}) {
                     value={email}
                     onEndEditing={setEmail}
                 />
+                <Text style={styles.helperText}>Username</Text>
+                <TextInput
+                    style={styles.input} 
+                    placeholder="Enter username..."
+                    value={username}
+                    onEndEditing={setUsername}
+                />
                 <Text style={styles.helperText}>Password</Text>
                 <TextInput
                     style={styles.input} 
@@ -58,70 +66,31 @@ function LoginScr ({navigation}) {
                     placeholder="Enter password..."
                     value={password}
                     onEndEditing={setPassword}
-                />
+                />                
                 <View style={styles.container}>
                     <Pressable 
                       style={presstableStyle.button}
-                      onPress={()=> sendLoginDetail(email, password)}
+                      onPress={()=> sendRegisterDetail(email, username, password)}
                     >
-                      <Text style={presstableStyle.text}>Login</Text>
+                      <Text style={presstableStyle.text}>Register</Text>
                     </Pressable>
-                    <Text style={styles.helperText}>Don't have an account?</Text>
-                    <Text> </Text>
+                    <Text style={styles.helperText}>Don't need an account?</Text>
                     <Pressable 
                       style={presstableStyle.button}
                       onPress={()=> navigation.navigate('Home')}
                     >
                       <Text style={presstableStyle.text}>Continue as guess</Text>
                     </Pressable>
+                    <Text style={styles.helperText}>Already have an account?</Text>
                     <Pressable 
                       style={presstableStyle.button}
-                      onPress={()=> navigation.navigate('Register')}
+                      onPress={()=> navigation.navigate('Login')}
                     >
-                      <Text style={presstableStyle.text}>Register</Text>
+                      <Text style={presstableStyle.text}>Login</Text>
                     </Pressable>
                 </View>
             </View>
         </View>
-    );
-}
-
-function UserInfo({navigation}) {
-    const [ isSessionValid, setIsSessionValid] = useState(false);
-    const [ status, setStatus] = useState(0);
-
-    const sessionValidator = async () => {
-        const shortToken = await secureStorageManager.loadValue('shortToken');
-
-        if (shortToken) {
-            try {
-                const shortResponse = await requestLPAMB('post', '/api/user/session');
-
-            } catch (e) {
-                console.log(`Session under construction, ${e.message}`);
-            }
-        }
-    }
-
-    return (
-      <View style={styles.container}>
-          <View>
-              <Text style={styles.text_1}>Account info</Text>
-          </View>
-          <View>
-              <Text style={styles.text_2}>WIP account info page</Text>
-              <View style={styles.container}>
-                  <Text> </Text>
-                  <Text style={styles.text_2}>Don't have an account?</Text>
-                  <Pressable 
-                    style={presstableStyle.button}
-                    onPress={()=> navigation.navigate('Register')}
-                  >
-                    <Text style={presstableStyle.text}>Register</Text>
-                  </Pressable>
-              </View>
-          </View>
-      </View>
     );
 }
 
@@ -194,6 +163,4 @@ const styles = StyleSheet.create({
       backgroundColor: 'orange',
     },  
   });
-
-  export default LoginScr;
-  
+export default RegisterScr;

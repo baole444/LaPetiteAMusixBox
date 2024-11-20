@@ -1,12 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions, Animated } from "react-native";
-import { Easing } from "react-native-reanimated";
 import musicPlayerHook from "./music-player";
 import Slider from '@react-native-community/slider';
-import Carousel from "react-native-reanimated-carousel";
 import Image_reload from "../Image_reload";
 import useNotifiPlayer from "./notfiPlayer";
 import { AppState } from "react-native";
+import { renderPlayerController } from "./playerContext";
 
 const pageWidth = Dimensions.get('window').width;
 
@@ -16,88 +15,8 @@ const timeStampFormatter = (millis) => {
     return `${minute}:${second < 10 ? '0' : ''}${second}`;
 }
 
-const TitleCarousel = (props) => {
-    const [width, setWidth] = useState();
-    const [layout, setLayout] = useState();
-    useEffect(() => {
-        if (typeof width === "number") setLayout({ width });
-    }, [width]);
-
-    useEffect(() => {
-        setLayout(undefined);
-    }, [props.text]);
-
-    const text =  (
-        <Animated.View
-            style={
-                [{
-                    flexWrap: 'wrap',
-                    width: layout?.width,
-                },]
-            }
-        >
-            <Text
-                style={{ color: "white" }}
-                onLayout={({ nativeEvent}) => {
-                    if (typeof layout === "undefined") setWidth(nativeEvent.layout.width);
-                }}
-            >
-                {props.text}
-            </Text>
-        </Animated.View>
-    );
-
-    return React.cloneElement(props.children(text, layout), {
-        key: props.text,
-    });
-}
-
-function TitleDisplay({trackName}) {
-    return (
-        <View>
-            <TitleCarousel text="This is a test string">
-                {(text, layout) =>{
-                    return(
-                        <View
-                            style={{
-                                alignItems: 'center',
-                                flex: 1,
-                                marginTop: 3
-                            }}
-                        >
-                            <Carousel
-                                width={layout?.width ?? pageWidth * 0.5}
-                                height={20}
-                                style={[
-                                    {
-                                        width: 100,
-                                    }
-                                ]}
-                                snapEnabled={false}
-                                pagingEnable={false}
-                                loop
-                                autoPlay
-                                withAnimation={{
-                                    type: 'timing',
-                                    config: {
-                                        duration: 1000,
-                                        easing: Easing.linear,
-                                    },
-                                }}
-                                autoPlayInterval={0}
-                                data={[...new Array(6).keys()]}
-                                renderItem={() => text}
-                            />
-                        </View>
-                    );
-                }}
-            </TitleCarousel>
-        </View>
-    );
-}
-
 const PlayController = () => {
-    const { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName } = musicPlayerHook();
+    const { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName } = renderPlayerController();
     
     const [ loadState, setLoadState ] = useState(false);
 

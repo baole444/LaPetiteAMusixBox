@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet, Pressable, Alert, TextInput } from 'react-native';
-import PlayController from '../musicPlayer/playerButton';
-import musicPlayerHook from '../musicPlayer/music-player';
+import { View, StyleSheet } from 'react-native';
+import PlayController from '../musicPlayer/playerController';
 
 function PlayerScreen() {
     return (
@@ -16,22 +15,7 @@ const styles = StyleSheet.create({
       padding: 10,
       backgroundColor: '#fff',
       alignItems: 'center'
-    },
-    button: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 12,
-        paddingHorizontal: 32,
-        borderRadius:4,
-        elevation: 0,
-        backgroundColor: 'transparent',
-    },
-    text: {
-        fontSize: 20,
-        lineHeight: 26,
-        fontWeight: 'bold',
-        color: 'orange',
-      },
+    }
 });
 
 export default PlayerScreen;

@@ -99,6 +99,55 @@ const dumpIpData = async () => {
     }
 };
 
+const readPlaylist = async () => {
+    const playlist = await AsyncStorage.getItem('playlist');
+    return playlist ? JSON.parse(playlist) : [];
+};
+
+const pushPlaylist = async (trackInfo) => {
+    try {
+        const playlist = await readPlaylist();
+
+        const index = playlist.findIndex((item) => item.trackId === trackInfo.trackId);
+    
+        if (index !== -1) {
+            const existedTrack = playlist[index];
+            const isSimilar = JSON.stringify(existedTrack) === JSON.stringify(trackInfo);
+        
+            if (isSimilar) {
+                console.log('Skipping existed track in database.');
+                return;
+            } else {
+                playlist[index] = trackInfo;
+                console.log('Updating existing track info.');
+            } 
+        } else {
+            playlist.push(trackInfo);
+            console.log('Track added to playlist');
+        }
+
+        await AsyncStorage.setItem('playlist', JSON.stringify(playlist));
+    } catch (e) {
+        console.error("Encountered problem(s) while saving playlist: ", e.message);
+    }
+};
+
+const deletePlaylistItem = async (trackId) => {
+    try {
+        const playlist = await readPlaylist();
+    
+        const newPlaylist = playlist.filter((item) => item.trackId !== trackId);
+    
+        await AsyncStorage.setItem('playlist', JSON.stringify(newPlaylist));
+
+        return await readPlaylist();
+    } catch (e) {
+        console.error("Encountered problem(s) while removing item from playlist: ", e.message);
+        return await readPlaylist();
+    }
+};
+
+
 export default {
     pushQueue,
     currentTrack,
@@ -108,5 +157,8 @@ export default {
     clearQueue,
     pushIp,
     seekIp,
-    dumpIpData
+    dumpIpData,
+    readPlaylist,
+    pushPlaylist,
+    deletePlaylistItem
 };
