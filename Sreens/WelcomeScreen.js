@@ -21,13 +21,13 @@ function WelcomeScreen({ navigation }) {
         />
         <Text style={styles.title}>L.A.M.B</Text>
         <Text style={styles.subtitle}>La à Musix Box</Text>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('CONTINUE AS GUEST')}>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Home')}>
           <Text style={styles.buttonText}>Continue as a Guest</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('LOGIN')}>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}>Login</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('REGISTER')}>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('Register')}>
           <Text style={styles.buttonText}>Register</Text>
         </Pressable>
       </View>

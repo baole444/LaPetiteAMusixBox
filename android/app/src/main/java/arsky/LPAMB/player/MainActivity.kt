@@ -1,5 +1,5 @@
-import expo.modules.splashscreen.SplashScreenManager
 package arsky.LPAMB.player
+import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
 import android.os.Bundle

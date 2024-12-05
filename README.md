@@ -94,6 +94,5 @@ Server IP is store in a single length async storage key, the test app provided a
 >    The reason the above is invalid because axios call in the app start with `/` by default, if you wish to change this behaviour consider trimming for user or change axios route.
 
 ## Known issues:
-- A song without looping in background on empty queue may cause queue on next song not start due to remaining sound object.
-- Notification based player doesn't show up.
-- Marquee implement for Track title is not functioning (Likely due to library no longer supporting it).
+- Beside concern about power efficiency and the control is a bit janky, this build is more stable.
+- This build also paused background music playing and enqueue implement due to the complexity of the issue it is facing.
