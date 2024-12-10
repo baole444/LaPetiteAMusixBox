@@ -252,7 +252,7 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
         return { newTrack: null, trackId: null };
     }
     try {
-        const response = await requestLPAMB('post', '/api/response/play', {data: trackID});
+        const response = await requestLPAMB('post', '/api/music/play', {data: trackID});
         if (response) {
             const base64String = arrayBufferToBase64(response);
             const trackUrl = `data:audio/mpeg;base64,${base64String}`;
@@ -289,7 +289,7 @@ const loadName = async (id, setTrackName) => {
         setTrackName('Error: Failed to query for title')
     }
     try {
-        const response = await requestLPAMB('post', '/api/response/title', {data: id});
+        const response = await requestLPAMB('post', '/api/music/title', {data: id});
         if (response) {
             console.log(`Title is: ${response}`)
             setTrackName(response);

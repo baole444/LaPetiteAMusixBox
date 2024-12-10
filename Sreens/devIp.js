@@ -36,6 +36,13 @@ function DevIpConfig() {
             if (!/^https?:\/\//i.test(ip)) {
                 formater = `https://${ip}`;
             }
+
+            const lastString = formater.length - 1;
+
+            if (formater.at(lastString) === "/") {
+                formater = formater.slice(0, -1);
+            }
+
             outIp = await asyncQueueManager.pushIp(formater);
             console.log(`Setting the Ip as ${formater}`);
 
@@ -49,7 +56,7 @@ function DevIpConfig() {
         <Text style = {style.title}>Update Server IP</Text>
         <TextInput
           style = {style.input}
-          placeholder="Enter Sever Adress"
+          placeholder="Enter Sever address"
           value={ip}
           onChangeText={setIp}
         />

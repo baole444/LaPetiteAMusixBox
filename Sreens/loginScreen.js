@@ -1,10 +1,8 @@
-
 import * as React from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
 import requestLPAMB from '../axios/wrapperAxios';
 import secureStorageManager from '../secure-storage-manager';
-import { NavigationContainer } from '@react-navigation/native';
 import { colors } from '../Server/constants';
 
 const sendLoginDetail = async(email, password) => {

@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions, Animated } from "react-native";
-import musicPlayerHook from "./music-player";
 import Slider from '@react-native-community/slider';
 import Image_reload from "../Image_reload";
 import useNotifiPlayer from "./notfiPlayer";
@@ -9,14 +8,14 @@ import { renderPlayerController } from "./playerContext";
 
 const pageWidth = Dimensions.get('window').width;
 
-const timeStampFormatter = (millis) => {
-    const minute = Math.floor(millis / 60000);
-    const second = Math.floor((millis % 60000) / 1000);
+const timeStampFormatter = (time) => {
+    const minute = Math.floor(time / 60);
+    const second = Math.floor(time % 60);
     return `${minute}:${second < 10 ? '0' : ''}${second}`;
 }
 
 const PlayController = () => {
-    const { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName } = renderPlayerController();
+    const { playing, setPlaying, looping, setLooping, trackSkipper, progress, progressBar, duration, instTrackID, trackName } = renderPlayerController();
     
     const [ loadState, setLoadState ] = useState(false);
 
@@ -124,12 +123,10 @@ const PlayController = () => {
 const styles = StyleSheet.create({
     container: {
         padding: 4,
-        backgroundColor: '#fff',
         alignItems: 'center',
     },
     slider: {
         paddingHorizontal: 10,
-        backgroundColor: '#fff',
     },
     button: {
         alignItems: 'center',
@@ -157,17 +154,14 @@ const timerFormat = StyleSheet.create({
     container: {
         flexDirection: 'row',
         padding: 4,
-        backgroundColor: '#fff',
     },
     progress_container: {
         width: pageWidth * 0.5,
-        backgroundColor: '#fff',
         alignItems: 'flex-start',
         paddingLeft: 16,
     },
     duration_container: {
         width: pageWidth * 0.5,
-        backgroundColor: '#fff',
         alignItems: 'flex-end',
         paddingRight: 16,
     },
@@ -181,12 +175,10 @@ const timerFormat = StyleSheet.create({
 const playControlButton = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        backgroundColor: '#fff',
     },
     item: {
         padding: 4,
         width: pageWidth / 3,
-        backgroundColor: '#fff',
         alignItems: 'center'
     },
 });
@@ -198,12 +190,10 @@ const title = StyleSheet.create({
         alignItems: 'center',
     },
     current_container: {
-        backgroundColor: '#fff',
         width: pageWidth * 0.3,
         alignContent: 'flex-end'
     },
     title_container: {
-        backgroundColor: '#fff',
         width: pageWidth * 0.7,
         alignContent: 'flex-start'
     },

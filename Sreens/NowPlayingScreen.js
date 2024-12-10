@@ -40,7 +40,7 @@ function NowPlayingScreen({ navigation }) {
   const fetchInfo = async (track_id) => {
     try {
       console.log('Calling fetchInfo for ID:', track_id);
-      const response = await requestLPAMB('post', '/api/response/fullinfo', { data: track_id });
+      const response = await requestLPAMB('post', '/api/music/fullinfo', { data: track_id });
       if (response && typeof response === 'object' && !Array.isArray(response)) {
         return response; 
       }

@@ -1,0 +1,15 @@
+{
+  "name": "arraybuffer_2_base64",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "arraybuffer_2_base64_bg.wasm",
+    "arraybuffer_2_base64.js",
+    "arraybuffer_2_base64.d.ts"
+  ],
+  "main": "arraybuffer_2_base64.js",
+  "types": "arraybuffer_2_base64.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

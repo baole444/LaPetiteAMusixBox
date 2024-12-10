@@ -1,24 +1,26 @@
 import asyncQueueManager from "../async-queue-manager";
 import { useState, useEffect } from 'react';
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+//import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import requestLPAMB from "../axios/wrapperAxios";
 
-// Will be depercated soon
+/**
+ * the queue logic of the app
+ * @deprecated
+ */
 
 const musicPlayerHook = () => {
     const [sound, setSound] = useState(null);
     const [playing, setPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [instTrackID, setInstTrackID] = useState(null);
     const [timer, setTimer] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isHandling, setIsHandling] = useState(false);
     const [currentTrackID, setCurrentTrackID] = useState(null);
-    const [isIdReady, setIsIdReady] = useState(false);
-    const [trackName, setTrackName] = useState(null);
     const [looping, setLooping] = useState(false);
     
+    const player = useAudioPlayer();
+
     // Fetching track ID from queue
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -197,15 +199,7 @@ const musicPlayerHook = () => {
 }
 
 
-const arrayBufferToBase64 = (buffer) => {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary); // Note: In React Native, use a different approach to encode if necessary.
-};
+
 
 const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
     if (!trackID) {
@@ -213,7 +207,7 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
         return { newTrack: null, trackId: null };
     }
     try {
-        const response = await requestLPAMB('post', '/api/response/play', {data: trackID});
+        const response = await requestLPAMB('post', '/api/music/play', {data: trackID});
         if (response) {
             const base64String = arrayBufferToBase64(response);
             const trackUrl = `data:audio/mpeg;base64,${base64String}`;
@@ -231,7 +225,6 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
             );
             setInstTrackID(trackID);
  
-            //console.log('New track generated: ', newTrack);
             return { newTrack, trackId: trackID }
 
         } else {
@@ -250,7 +243,7 @@ const loadName = async (id, setTrackName) => {
         setTrackName('Error: Failed to query for title')
     }
     try {
-        const response = await requestLPAMB('post', '/api/response/title', {data: id});
+        const response = await requestLPAMB('post', '/api/music/title', {data: id});
         if (response) {
             console.log(`Title is: ${response}`)
             setTrackName(response);

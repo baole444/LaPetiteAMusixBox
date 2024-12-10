@@ -1,5 +1,6 @@
 import {  createContext, useContext } from "react";
-import musicPlayerHook from "./music-player";
+import useMusicEngine from "./useMusicEngine";
+
 
 // Context allow seperation of hook and render.
 // This is needed because NowPlayingScreen should share control with playerController
@@ -7,7 +8,7 @@ import musicPlayerHook from "./music-player";
 const MusicControllerContext = createContext();
 
 export const MusicControllerProvider = ({ children }) => {
-    const musicHook = musicPlayerHook();
+    const musicHook = useMusicEngine();
 
     return (
         <MusicControllerContext.Provider value={musicHook}>

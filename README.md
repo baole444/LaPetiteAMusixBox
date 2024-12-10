@@ -1,6 +1,10 @@
 # LePetiteAMusixBox
  A music (box) player built using React Native/Expo.
 
+> [!IMPORTANT]
+> The application is under going refactoring with many breaking change
+> This note is generated on 0.0.5. LPAMB backend server will also need to be on same version to support new routing.
+
 ## Feature:
 Queue music, allow queue up multiple track to play.
 Loop track and skip track.

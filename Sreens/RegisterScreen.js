@@ -3,21 +3,24 @@ import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
 import requestLPAMB from '../axios/wrapperAxios';
 import secureStorageManager from '../secure-storage-manager';
-import { NavigationContainer } from '@react-navigation/native';
 import { colors } from '../Server/constants';
 
+const emailFormatCheck = (email) => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
 const sendRegisterDetail = async(email, username, password) => {
-    if (!email || !password) {
-        console.log('Password or Email missing, retunring...');
+    if (!email || !username || !password) {
+        console.log('One of the field is missing, retunring...');
         return;
     }
+
+    if (!emailFormatCheck(email)) {
+        console.log('The entered Email is not the correct format.');
+        return;
+    }
+
     try {
-        const data = JSON.parse(`{"email":"${email}", "username":"${username}", "password":"${password}"}`)
-        const response = await requestLPAMB('post', '/api/user/register', data);
-        
-        if (response) {
-          console.log(response);
-        }
+        const data = { email, username, password};
+        const response = await requestLPAMB('post', '/api/user/register', {data: data});
 
     } catch (e) {
         console.log(`There was problem while register: ${e.message}`);
@@ -34,9 +37,9 @@ function RegisterScr ({navigation}) {
     });
   }, [navigation]);
 
-    const [email, setEmail] = useState(null);
-    const [password, setPassword] = useState(null);
-    const [username, setUsername] = useState(null);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
 
     return (
         <View style={styles.container}>
@@ -50,14 +53,14 @@ function RegisterScr ({navigation}) {
                     style={styles.input} 
                     placeholder="Enter email adress..."
                     value={email}
-                    onEndEditing={setEmail}
+                    onChangeText={setEmail}
                 />
                 <Text style={styles.helperText}>Username</Text>
                 <TextInput
                     style={styles.input} 
                     placeholder="Enter username..."
                     value={username}
-                    onEndEditing={setUsername}
+                    onChangeText={setUsername}
                 />
                 <Text style={styles.helperText}>Password</Text>
                 <TextInput
@@ -65,7 +68,7 @@ function RegisterScr ({navigation}) {
                     secureTextEntry={true}
                     placeholder="Enter password..."
                     value={password}
-                    onEndEditing={setPassword}
+                    onChangeText={setPassword}
                 />                
                 <View style={styles.container}>
                     <Pressable 
