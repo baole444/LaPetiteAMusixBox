@@ -1,9 +1,12 @@
 import * as React from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
+import { View, Text, Pressable, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
 import requestLPAMB from '../axios/wrapperAxios';
 import secureStorageManager from '../secure-storage-manager';
-import { colors } from '../Server/constants';
+import { colors, styles } from '../universal';
+
+const style = styles.sharedStyle;
+const presstable = styles.sharedPresstable;
 
 const emailFormatCheck = (email) => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
@@ -19,7 +22,7 @@ const sendRegisterDetail = async(email, username, password) => {
     }
 
     try {
-        const data = { email, username, password};
+        const data = { email, username, password };
         const response = await requestLPAMB('post', '/api/user/register', {data: data});
 
     } catch (e) {
@@ -42,54 +45,54 @@ function RegisterScr ({navigation}) {
     const [username, setUsername] = useState('');
 
     return (
-        <View style={styles.container}>
+        <View style={style.container_account}>
             <View>
-                <Text style={styles.title}> L.P.A.M.B </Text>
-                <Text style={styles.subtitle}>Account register</Text>
+                <Text style={style.title_account}> L.P.A.M.B </Text>
+                <Text style={style.subtitle_account}>Account register</Text>
             </View>
             <View>
-                <Text style={styles.helperText}>Email</Text>
+                <Text style={style.helper_text}>Email</Text>
                 <TextInput
-                    style={styles.input} 
+                    style={style.input_account} 
                     placeholder="Enter email adress..."
                     value={email}
                     onChangeText={setEmail}
                 />
-                <Text style={styles.helperText}>Username</Text>
+                <Text style={style.helper_text}>Username</Text>
                 <TextInput
-                    style={styles.input} 
+                    style={style.input_account} 
                     placeholder="Enter username..."
                     value={username}
                     onChangeText={setUsername}
                 />
-                <Text style={styles.helperText}>Password</Text>
+                <Text style={style.helper_text}>Password</Text>
                 <TextInput
-                    style={styles.input} 
+                    style={style.input_account} 
                     secureTextEntry={true}
                     placeholder="Enter password..."
                     value={password}
                     onChangeText={setPassword}
                 />                
-                <View style={styles.container}>
+                <View style={style.container_account}>
                     <Pressable 
-                      style={presstableStyle.button}
+                      style={presstable.button_account}
                       onPress={()=> sendRegisterDetail(email, username, password)}
                     >
-                      <Text style={presstableStyle.text}>Register</Text>
+                      <Text style={presstable.text_account}>Register</Text>
                     </Pressable>
-                    <Text style={styles.helperText}>Don't need an account?</Text>
+                    <Text style={style.helper_text}>Don't need an account?</Text>
                     <Pressable 
-                      style={presstableStyle.button}
+                      style={presstable.button_account}
                       onPress={()=> navigation.navigate('Home')}
                     >
-                      <Text style={presstableStyle.text}>Continue as guess</Text>
+                      <Text style={presstable.text_account}>Continue as guess</Text>
                     </Pressable>
-                    <Text style={styles.helperText}>Already have an account?</Text>
+                    <Text style={style.helper_text}>Already have an account?</Text>
                     <Pressable 
-                      style={presstableStyle.button}
+                      style={presstable.button_account}
                       onPress={()=> navigation.navigate('Login')}
                     >
-                      <Text style={presstableStyle.text}>Login</Text>
+                      <Text style={presstable.text_account}>Login</Text>
                     </Pressable>
                 </View>
             </View>
@@ -97,73 +100,4 @@ function RegisterScr ({navigation}) {
     );
 }
 
-const styles = StyleSheet.create({
-    container_1: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    container: {
-      flex: 1,
-      backgroundColor: '#d9d9d9',
-      alignItems: 'center',
-      padding: 20,
-    },
-    subtitle: {
-      textAlign: 'center',
-      fontSize: 18,
-      marginBottom: 20,
-    },
-    title: {
-      textAlign: 'center',
-      fontSize: 32,
-      margin: 10,
-      fontWeight: 'bold',
-    },
-    helperText: {
-      textAlign: 'left',
-      fontSize: 18,
-      marginTop: 5,
-    },
-    input: {
-      backgroundColor: '#fff',
-      width: 250,
-      backgroundColor: 'white',
-      height: 40,
-      padding: 10,
-      borderRadius: 5,
-      marginVertical: 10,
-      borderColor: 'gray',
-      borderWidth: 1,
-    },
-  });
-  
-  const presstableStyle = StyleSheet.create({
-    button: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 10,
-      borderRadius: 10,
-      elevation: 1,
-      backgroundColor: colors.primary,
-      width: 200,
-      borderCurve: 'circular',
-      marginBottom: 20,
-    },
-    text: {
-      fontSize: 16,
-      lineHeight: 20,
-      fontWeight: 'bold',
-    },
-    button_scroll: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 12,
-      paddingHorizontal: 24,
-      borderRadius:4,
-      elevation: 0,
-      backgroundColor: 'orange',
-    },  
-  });
 export default RegisterScr;

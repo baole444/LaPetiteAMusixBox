@@ -2,100 +2,25 @@
  A music (box) player built using React Native/Expo.
 
 > [!IMPORTANT]
-> The application is under going refactoring with many breaking change
-> This note is generated on 0.0.5. LPAMB backend server will also need to be on same version to support new routing.
+> The application is under going refactoring with many breaking change. Since version 0.0.5, The app will check for backend service version ensure compatibility
 
-## Feature:
-Queue music, allow queue up multiple track to play.
-Loop track and skip track.
-Playback is possible in background, allow you to listen to your favourite song while attending to other business.
+## About:
+A simple music queue play back application. rely on self deploy backend service.
 
-## Server:
-This repo come with a `node.js` base server located in `Server` folder. To start the server, run `node server.js`.
-Some server database/port connection property can be find in `/config/connection.yml`
+**More detail construction will come soon**
 
-### connection.yml default:
-```yaml
-mysql:
-  host: 'localhost'
-  user: 'LPAMB'
-  password: 'LpamBroot'
-  database: 'lpamb_track_data'
-  connectionLimit: 100,
-  maxIdle: 50,
-  waitForConnections: true,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-  idleTimeout: 120000,
-  port: 3306
-server:
-  port: 25565
-  storage: 'storage'
-  track: 'music'
-  certificate: 'cer'
-  config: 'config'
-```
-#### Setup database:
-Here is a quick mysql file to setup the tables use by database (You still need to add data yourself):
+## Connect to a service:
+The app allow user to connect to a domain or address of a LPAMB backend service.<br>
+For more information on hosting a service yourself, visit [LPAMB Backend Service](https://github.com/baole444/LPAMB-Backend-Service) for more information.
 
-```sql
-use lpamb_track_data;
-
-CREATE TABLE artist (
-    artist_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    name VARCHAR(100) NOT NULL,
-    info TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE album (
-    album_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    name VARCHAR(100) NOT NULL,
-    release_date DATE,  -- Optional release date
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE music (
-    track_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    title VARCHAR(100) NOT NULL,
-    artist_id CHAR(36),
-    album_id CHAR(36),
-    genre VARCHAR(50),
-    file_path VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (artist_id) REFERENCES artist(artist_id) ON DELETE CASCADE,
-    FOREIGN KEY (album_id) REFERENCES album(album_id) ON DELETE CASCADE
-);
-
-CREATE TABLE users (
-    user_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### Connecting to the server:
-By default server run on `https` at `https://localhost:25565`, however this will cause failure unless you have a certificate from trusted source. To deploy your own LPAMB Server, you can use [Ngrok service](https://ngrok.com/) with [Agent](https://ngrok.com/docs/agent/).
-
-To start tunneling for LPAMB Server, you can run following:
-```bash
-ngrok http https://localhost:25565
-```
-
-Server IP is store in a single length async storage key, the test app provided a screen call `devIp.js` for you to try this out.
+Server IP is store in a single length async storage key, the test app provided a screen call  for you to try this out.
 
 > [!NOTE]
-> #### Valid ip look like:
->     `http://YourServerIp.xyz:whateverportifnot80`
->     `https://YourServerIp.xyz:whateverportifnot80`
->     `YourServerIp.xyz:whateverportifnot80`
->     `https://YourServerIp.xyz:whateverportifnot80/route/moreroute/routInfinitum`
-> #### Invalid ip look like:
->    `https://YourServerIp.xyz:whateverportifnot80/route/moreroute/routInfinitum/`
->    
->    The reason the above is invalid because axios call in the app start with `/` by default, if you wish to change this behaviour consider trimming for user or change axios route.
+> 1. Valid ip look like:
+>    - `http://example-domain.xyz:1234`
+>    - `https://example-domain.xyz`
+>    - `example-domain.xyz`
+>    - `example-domain.xyz/route/route/.../route`
 
 ## Known issues:
 - Beside concern about power efficiency and the control is a bit janky, this build is more stable.

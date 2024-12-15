@@ -14,6 +14,13 @@ const timeStampFormatter = (time) => {
     return `${minute}:${second < 10 ? '0' : ''}${second}`;
 }
 
+const timeStampFormatterMilis = (millis) => {
+    const minute = Math.floor(millis / 60000);
+    const second = Math.floor((millis % 60000) / 1000);
+    return `${minute}:${second < 10 ? '0' : ''}${second}`;
+}
+
+
 const PlayController = () => {
     const { playing, setPlaying, looping, setLooping, trackSkipper, progress, progressBar, duration, instTrackID, trackName } = renderPlayerController();
     
@@ -102,10 +109,10 @@ const PlayController = () => {
             </View>
             <View style={timerFormat.container}>
                 <View style={timerFormat.progress_container}>
-                    <Text style={timerFormat.text}>{`${timeStampFormatter(progress * duration)}`}</Text>
+                    <Text style={timerFormat.text}>{`${timeStampFormatterMilis(progress * duration)}`}</Text>
                 </View>
                 <View style={timerFormat.duration_container}>
-                    <Text style={timerFormat.text}>{`${timeStampFormatter(duration)}`}</Text>
+                    <Text style={timerFormat.text}>{`${timeStampFormatterMilis(duration)}`}</Text>
                 </View>
             </View>
             <View style={title.container}>

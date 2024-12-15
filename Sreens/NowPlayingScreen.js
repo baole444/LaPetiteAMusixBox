@@ -1,15 +1,16 @@
 import '../gesture-handler';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Dimensions  } from 'react-native';
-import { colors } from '../Server/constants';
-import * as SplashScreen from 'expo-splash-screen';
-import PlayerScreen from './playerAllscr';
+import { View, Text, Pressable, ScrollView } from 'react-native';
+import { colors, styles } from '../universal';
+import PlayerScreen from './PlayerAllscr';
 import Image_reload from '../Image_reload';
 import asyncQueueManager from '../async-queue-manager';
 import requestLPAMB from '../axios/wrapperAxios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-SplashScreen.preventAutoHideAsync();
+
+const style = styles.nowPlayingStyle;
+const presstable = styles.sharedPresstable
 
 function NowPlayingScreen({ navigation }) {
   const [trackList, setTrackData] = useState([]); // For fetched track details
@@ -63,10 +64,7 @@ function NowPlayingScreen({ navigation }) {
   
       initializeQueue();
   
-
-      return () => {
-
-      };
+      return () => {};
     }, []) 
   );
 
@@ -111,17 +109,15 @@ function NowPlayingScreen({ navigation }) {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.albumContainer}>
+    <View>
+      <View>
         <Image_reload
           source={require('../assets/texture/file_broken.png')}
         />
-        <Text style={styles.nextSongsTitle}>Thumbnail coming soon(tm)</Text>
+        <Text style={style.next_song_title}>Thumbnail coming soon(tm)</Text>
       </View>
-
       <PlayerScreen />
-
-      <Text style={styles.nextSongsTitle}>Next songs:</Text>
+      <Text style={style.next_song_title}>Next songs:</Text>
       <ScrollView
         horizontal
         contentContainerStyle={{ paddingHorizontal: 10 }}
@@ -129,94 +125,23 @@ function NowPlayingScreen({ navigation }) {
       >
         {Array.isArray(trackList) && trackList.length > 0 ? (
           trackList.map((item, index) => (
-            <View key={index} style={styles.songCard}>
-              <Text style={styles.nextSongsTitle}>{item.title}</Text>
-                <Text style={styles.songCardArtist}>{item.artist}</Text>
+            <View key={index} style={style.song_card}>
+              <Text style={style.next_song_title}>{item.title}</Text>
+                <Text style={style.song_card_artist}>{item.artist}</Text>
               <Pressable
-                style={presstableStyle.button}
+                style={presstable.button}
                 onPress={() => removeFromQueue(item.trackId)}
               >
-                <Text style={presstableStyle.text}>Remove</Text>
+                <Text style={presstable.button_text}>Remove</Text>
               </Pressable>
             </View>
           ))
         ) : (
-          <Text style={styles.cardText}>No upcoming tracks</Text>
+          <Text style={style.next_song_title}>No upcoming track</Text>
         )}
       </ScrollView>
     </View>
   );
 }
-
-  const styles = StyleSheet.create({
-    nextSongsTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginTop: 20,
-      textAlign: 'center',
-    },
-    nextSongsContainer: {
-      flexDirection: 'row',
-      marginTop: 10,
-      justifyContent: 'center',
-    },
-    songCard: {
-      width: 120,
-      padding: 10,
-      marginRight: 10,
-      backgroundColor: '#FBCB3C',
-      borderRadius: 10,
-      alignItems: 'center',
-    },
-    songCardImage: {
-      width: 80,
-      height: 80,
-      borderRadius: 5,
-      marginBottom: 5,
-    },
-    songCardTitle: {
-      fontSize: 12,
-      fontWeight: 'bold',
-      textAlign: 'center',
-    },
-    songCardArtist: {
-      fontSize: 12,
-      color: 'gray',
-      textAlign: 'center',
-    },
-    songCardEmpty: {
-      width: 120,
-      height: 270,
-      marginRight: 10,
-      backgroundColor: '#FBCB3C',
-      borderRadius: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-    }
-  });
-  
-  const presstableStyle = StyleSheet.create({
-    button: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 10,
-      borderRadius: 10,
-      elevation: 1,
-      backgroundColor: colors.primary,
-      borderCurve: 'circular',
-      marginBottom: 20,
-    },
-    text: {
-      fontSize: 14,
-      lineHeight: 16,
-      fontWeight: 'bold',
-      color: '#222034',
-    },
-    presstableSubContainer: {
-      flexDirection: 'row',
-      padding: 10,
-      justifyContent: 'space-evenly'
-    },
-  });
   
 export default NowPlayingScreen;

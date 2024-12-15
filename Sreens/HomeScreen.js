@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Image } from 'react-native';
-import { colors } from '../Server/constants';
+import { View, Text, TextInput, Pressable, ScrollView } from 'react-native';
+import { colors, styles } from '../universal';
 import requestLPAMB from "../axios/wrapperAxios";
 import asyncQueueManager from "../async-queue-manager";
+
+const style = styles.homescrStyle;
+const shared = styles.sharedStyle;
+const presstable = styles.sharedPresstable;
 
 const sendPlayRequest = async (track_id) => {
   asyncQueueManager.pushQueue(track_id);
@@ -48,9 +52,9 @@ function HomeScreen({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={styles.searchContainer}>
+      <View style={style.search_container}>
         <TextInput
-          style={styles.searchInput}
+          style={style.search_input}
           placeholder="What do you want to hear sweetheart?"
           value={keyword}
           onChangeText={setKeyword}
@@ -59,149 +63,49 @@ function HomeScreen({ navigation }) {
         />
       </View>
       
-      <View style={styles.genreContainer}>
+      <View style={style.genre_container}>
         {['Jazz', 'Bass', 'Lo-fi', 'Pop', 'Rock'].map((genre, index) => (
-          <Pressable key={index} style={styles.genreButton}>
-            <Text style={styles.genreText}>{genre}</Text>
+          <Pressable key={index} style={style.genre_button}>
+            <Text style={style.genre_text}>{genre}</Text>
           </Pressable>
         ))}
       </View>
 
-      <View style={styles.cardContainer}>
+      <View style={style.card_container}>
         {Array.isArray(trackList) && trackList.length > 0 ? (trackList.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <View style={styles.cardSubContainer}>
-              <Text style={styles.cardSubTitle}>Artist: </Text>
-              <Text style={styles.cardText}>{item.artist}</Text>
+          <View key={index} style={style.card}>
+            <Text style={shared.card_title}>{item.title}</Text>
+            <View style={shared.card_sub_container}>
+              <Text style={shared.card_sub_title}>Artist: </Text>
+              <Text style={shared.card_text}>{item.artist}</Text>
             </View>
-            <View style={styles.cardSubContainer}>
-              <Text style={styles.cardSubTitle}>Album: </Text>
-              <Text style={styles.cardText}>{item.album}</Text>
+            <View style={shared.card_sub_container}>
+              <Text style={shared.card_sub_title}>Album: </Text>
+              <Text style={shared.card_text}>{item.album}</Text>
             </View>
-            <View style={presstableStyle.presstableSubContainer}>
+            <View style={presstable.presstable_sub_container}>
               <Pressable
-                style={presstableStyle.button}
+                style={presstable.button}
                 onPress={() => sendPlayRequest(item.trackId)}
               >
-                <Text style={presstableStyle.text}>Add to queue</Text>
+                <Text style={presstable.button_text}>Add to queue</Text>
               </Pressable>
               <Pressable
-              style={presstableStyle.button}
+              style={presstable.button}
               onPress={() => saveToPlayList(item)}
               >
-                <Text style={presstableStyle.text}>Save to playlist</Text>
+                <Text style={presstable.button_text}>Save to playlist</Text>
               </Pressable>
             </View>
           </View>
           ))
         ) : (
-          <Text style={styles.cardText}>No track found</Text>
+          <Text style={style.card_text}>No track found</Text>
         )
       } 
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  searchContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 30,
-    marginLeft: 15,
-    marginRight: 15,
-  },
-  searchInput: {
-    flex: 1,
-    width: '95%',
-    height: 60,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingLeft: 40,
-    backgroundColor: '#f5f5f5',
-  },
-  genreContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  genreButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 20,
-  },
-  genreText: {
-    fontSize: 14,
-    color: '#fff',
-  },
-  cardContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-  },
-  card: {
-    width: '86%',
-    backgroundColor: '#FFD700',
-    borderRadius: 10,
-    marginBottom: 15,
-  },
-  cardTitle: {
-    textAlign: 'center',
-    fontSize: 16,
-    padding: 4,
-    color: '#3f2b77',
-    fontWeight: 'bold',
-  },
-  cardText: {
-    textAlign: 'center',
-    fontSize: 12,
-    padding: 4,
-    fontWeight: '400',
-    color: '#5b6ee1',
-  },
-  cardSubTitle: {
-    textAlign: 'center',
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: 'white',
-    padding: 4,
-  },
-  cardSubContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-  },
-});
-
-const presstableStyle = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    borderRadius: 10,
-    elevation: 1,
-    backgroundColor: colors.primary,
-    borderCurve: 'circular',
-    marginBottom: 20,
-  },
-  text: {
-    fontSize: 14,
-    lineHeight: 16,
-    fontWeight: 'bold',
-    color: '#222034',
-  },
-  presstableSubContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    justifyContent: 'space-evenly'
-  },
-});
 
 export default HomeScreen;

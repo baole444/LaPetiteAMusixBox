@@ -3,7 +3,7 @@
     "scheme": "lpamb",
     "name": "La Petite A Musix Box",
     "slug": "la_petite_a_musix_box",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "orientation": "portrait",
     "icon": "./assets/texture/lpamb_icon.png",
     "userInterfaceStyle": "light",
@@ -52,14 +52,7 @@
       "expo-asset",
       "expo-secure-store",
       "expo-build-properties",
-      "expo-audio",
-      "react-native-webassembly"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "fa632e25-a900-4efc-8635-e29375c94fa8"
-      }
-    },
-    "owner": "baole444"
+      "expo-audio"
+    ]
   }
 }

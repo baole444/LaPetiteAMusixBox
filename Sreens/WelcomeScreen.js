@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
-import { colors } from '../Server/constants';
+import { View, Text, Pressable } from 'react-native';
+import { colors, styles } from '../universal';
+import Image_reload from '../Image_reload';
+
+const style = styles.welcome;
 
 function WelcomeScreen({ navigation }) {
   useEffect(() => {
@@ -13,64 +16,35 @@ function WelcomeScreen({ navigation }) {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Image 
+    <View style={style.container}>
+      <View style={style.content}>
+        <Image_reload
           source={require('../assets/LPAMB.png')} 
-          style={styles.image} 
+          scale={1}
         />
-        <Text style={styles.title}>L.A.M.B</Text>
-        <Text style={styles.subtitle}>La à Musix Box</Text>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.buttonText}>Continue as a Guest</Text>
+        <Text style={style.title}>L.P.A.M.B</Text>
+        <Text style={style.subtitle}>La Petite A Musix Box</Text>
+        <Pressable 
+          style={style.button} 
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={style.button_text}>Continue as a Guest</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.buttonText}>Login</Text>
+        <Pressable 
+          style={style.button} 
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={style.button_text}>Login</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.buttonText}>Register</Text>
+        <Pressable 
+          style={style.button} 
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={style.button_text}>Register</Text>
         </Pressable>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#d9d9d9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  content: {
-    alignItems: 'center',
-    marginBottom: 80,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: colors.primary,
-    padding: 10,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: 200,
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 16,
-    color: 'black',
-  },
-});
 
 export default WelcomeScreen;

@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { colors } from '../Server/constants';
+import { View, Text, Pressable } from 'react-native';
+import { colors, styles } from '../universal';
 import asyncQueueManager from '../async-queue-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlatList } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
+
+const style = styles.libraryStyle;
+const shared = styles.sharedStyle
+const presstable = styles.sharedPresstable;
+
 const sendPlayRequest = async (track_id) => {
   asyncQueueManager.pushQueue(track_id);
   console.log(`Added ${track_id} to queue.`);
@@ -71,28 +76,28 @@ function LibraryScreen({ navigation }) {
 
   const trackItems = ({ item }) => {
     return (
-      <View style={styles.card}>
-      <Text style={styles.cardTitle}>{item.title}</Text>
-      <View style={styles.cardSubContainer}>
-        <Text style={styles.cardSubTitle}>Artist: </Text>
-        <Text style={styles.cardText}>{item.artist}</Text>
+      <View style={style.card}>
+      <Text style={shared.card_title}>{item.title}</Text>
+      <View style={shared.card_sub_container}>
+        <Text style={shared.card_sub_title}>Artist: </Text>
+        <Text style={shared.card_text}>{item.artist}</Text>
       </View>
-      <View style={styles.cardSubContainer}>
-        <Text style={styles.cardSubTitle}>Album: </Text>
-        <Text style={styles.cardText}>{item.album}</Text>
+      <View style={shared.card_sub_container}>
+        <Text style={shared.card_sub_title}>Album: </Text>
+        <Text style={shared.card_text}>{item.album}</Text>
       </View>
-      <View style={presstableStyle.presstableSubContainer}>
+      <View style={presstable.presstable_sub_container}>
         <Pressable
-          style={presstableStyle.button}
+          style={presstable.button}
           onPress={() => sendPlayRequest(item.trackId)}
         >
-          <Text style={presstableStyle.text}>Add to queue</Text>
+          <Text style={presstable.button_text}>Add to queue</Text>
         </Pressable>
         <Pressable
-          style={presstableStyle.button}
+          style={presstable.button}
           onPress={() => deleteTrackItem(item.trackId)}
         >
-          <Text style={presstableStyle.text}>Remove from playlist</Text>
+          <Text style={presstable.button_text}>Remove from playlist</Text>
         </Pressable>
       </View>
 
@@ -101,7 +106,7 @@ function LibraryScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={style.container}>
       {playlist && playlist.length > 0 ? (
         <FlatList
             data ={playlist}
@@ -109,109 +114,10 @@ function LibraryScreen({ navigation }) {
             keyExtractor ={(item) => item.trackId.toString()}
         />
       ) : (
-        <Text style={styles.noTracksText}>No tracks in playlist</Text>
+        <Text style={style.song_title}>No tracks in playlist</Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  noTracksText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  card: {
-    backgroundColor: '#FFD700',
-    borderRadius: 10,
-    marginBottom: 15,
-  },
-  cardTitle: {
-    textAlign: 'center',
-    fontSize: 16,
-    padding: 4,
-    color: '#3f2b77',
-    fontWeight: 'bold',
-  },
-  cardText: {
-    textAlign: 'center',
-    fontSize: 12,
-    padding: 4,
-    fontWeight: '400',
-    color: '#5b6ee1',
-  },
-  cardSubTitle: {
-    textAlign: 'center',
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: 'white',
-    padding: 4,
-  },
-  cardSubContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-  },
-});
-
-const presstableStyle = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    borderRadius: 10,
-    elevation: 1,
-    backgroundColor: colors.primary,
-    borderCurve: 'circular',
-    marginBottom: 20,
-  },
-  text: {
-    fontSize: 14,
-    lineHeight: 16,
-    fontWeight: 'bold',
-    color: '#222034',
-  },
-  presstableSubContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    justifyContent: 'space-evenly'
-  },
-});
-
-const libraryStyles = StyleSheet.create({
-  songContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFD700',
-    borderRadius: 10,
-    marginBottom: 15,
-    padding: 10,
-    width: '90%',
-    height: 100,
-    marginBottom: 10,
-    marginTop: 10,
-    marginLeft: 20,
-  },
-  songImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  songInfo: {
-    flexDirection: 'column',
-  },
-  songTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  songArtist: {
-    fontSize: 14,
-    color: '#6D6D6D',
-  },
-});
 
 export default LibraryScreen;

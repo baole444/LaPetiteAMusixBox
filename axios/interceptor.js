@@ -3,7 +3,7 @@
 const requestInterceptor = (instance) => {
     instance.interceptors.request.use(
         (config) => {
-            if (config.url.includes('/api/response/play')) {
+            if (config.url.includes('/api/music/play')) {
                 console.log(`Response type need to be Arraybuffer.`)
                 config.responseType = 'arraybuffer';
             }

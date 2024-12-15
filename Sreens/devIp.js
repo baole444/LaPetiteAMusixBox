@@ -51,6 +51,20 @@ function DevIpConfig() {
         }
     }
 
+      useEffect(() => {
+        navigation.setOptions({
+          headerTitle: 'Music Service',
+          headerStyle: {
+            backgroundColor: colors.primary,
+          },
+          headerTitleStyle: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: '#4A4A4A',
+          },
+        });
+      }, [navigation]);
+
     return (
       <View style = {style.container}>
         <Text style = {style.title}>Update Server IP</Text>

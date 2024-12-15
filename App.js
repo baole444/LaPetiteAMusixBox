@@ -12,10 +12,10 @@ import * as Linking from 'expo-linking';
 import WelcomeScreen from './Sreens/WelcomeScreen';
 import RegisterScreen from './Sreens/RegisterScreen';
 import HomeScreen from './Sreens/HomeScreen';
-import PlayerScreen from './Sreens/playerAllscr';
+import PlayerScreen from './Sreens/PlayerAllscr';
 import NowPlayingScreen from './Sreens/NowPlayingScreen';
-import LoginScr from './Sreens/loginScreen';
-import DevIpConfig from './Sreens/devIp';
+import LoginScr from './Sreens/LoginScreen';
+import DevIpConfig from './Sreens/DevIP';
 import LibraryScreen from './Sreens/LibraryScreen';
 import { MusicControllerProvider } from './musicPlayer/playerContext';
 

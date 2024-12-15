@@ -2,26 +2,24 @@ import asyncQueueManager from "../async-queue-manager";
 import { useState, useEffect } from 'react';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import requestLPAMB from "../axios/wrapperAxios";
-//import * as WebAssembly from 'react-native-webassembly';
-//import AB2Base64 from '../scr/wasm/pkg/arraybuffer_2_base64_bg.wasm';
+import { File, Paths } from 'expo-file-system/next';
 
-
+// Current goal: load a track successfully with expo-audio
 const useMusicEngine = () => {
     // the main player and the only player/status tracker.
     // all logic should update these 2 hook.
     // DO NOT CALL IT IN A CONDITION
-    const player = useAudioPlayer(null, 1000);
+    const player = useAudioPlayer('', 1000);
     const status = useAudioPlayerStatus(player);
 
     // Logic group
-    const [source, setSource] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isHandling, setIsHandling] = useState(false);
     const [isIdReady, setIsIdReady] = useState(false);
     const [instTrackID, setInstTrackID] = useState(null);
 
     // Interface and control group
-    const [trackName, setTrackName] = useState(null);
+    const [trackName, setTrackName] = useState('');
     const [playing, setPlaying] = useState(false);
     const [looping, setLooping] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -35,7 +33,6 @@ const useMusicEngine = () => {
 
             const fetchedID= await asyncQueueManager.currentTrack();
             if (!fetchedID) {
-                //console.warn("Fetched an empty or null entry.");
                 return;
             }
             
@@ -55,7 +52,7 @@ const useMusicEngine = () => {
     // Play button effect, update on playing state, also allow auto play on next track.
     // TODO: need to trigger these on new track load
     useEffect(() => {
-        if (player.isLoaded) {
+        if (player) {
             if (playing) {
                 player.play();
             } else {
@@ -82,10 +79,6 @@ const useMusicEngine = () => {
     }
 
     const trackHandler = async () => {
-        await setAudioModeAsync({
-            shouldPlayInBackground: true,
-            interruptionMode: 'doNotMix',
-        });
 
         console.log('Handling trackID: ', instTrackID);
         if (!instTrackID) {
@@ -96,16 +89,23 @@ const useMusicEngine = () => {
         setIsHandling(true);
         setIsLoading(true);
         
-        console.log("Calling loadTrack with ID: ", instTrackID);
-
-        const success = await loadTrack(instTrackID, setInstTrackID, setSource);
-        await getTrackData(instTrackID, setTrackName);
+        console.log("Calling getSource with ID: ", instTrackID);
+        
+        // No await and success / source will be undefine.
+        const { success, source } = await getSource(instTrackID, setInstTrackID);
 
         if (success) {
-            console.log('Track loaded successfully.');
-            player.replace(source);
+            console.log('Source obtained successfully.');
 
-            if (playing) {
+            const audioSource = { uri: source };
+            console.log(`Source: ${source}`);
+            // TODO: refactor this to return full track detail, update it for the now playing screen, this will reduce the amount of request made
+            await getTrackData(instTrackID, setTrackName);
+            console.log(`Proceeding to load player...`);
+
+            player.replace(audioSource);
+
+            if (playing && player.paused) {
                 console.log('Starting playback...');
                 player.play();
             }
@@ -114,7 +114,6 @@ const useMusicEngine = () => {
                 setProgress(player.currentTime / player.duration);
                 setDuration(player.duration);
             }
-
         } else {
             console.warn('Failed to load the track. TrackID:', instTrackID);
             setIsHandling(false);
@@ -125,9 +124,8 @@ const useMusicEngine = () => {
         setIsHandling(false);
     }
 
-
     useEffect(() => {
-        if (!isHandling && instTrackID === null) {
+        if (!isHandling && instTrackID) {
             console.log('Checking if ID is ready... current state:', isIdReady);
             if (isIdReady) {
                 trackHandler();
@@ -135,14 +133,13 @@ const useMusicEngine = () => {
         }
     }, [instTrackID, isIdReady]);
 
-
     useEffect(() => {
         if (player.isLoaded) {
             const intervalId = setInterval(() => {
             if (playing) {    
                 if (player.isLoaded) {
-                    setProgress(status.currentTime / status.duration);
-                    setDuration(status.duration);
+                    setProgress(player.currentTime / player.duration);
+                    setDuration(player.duration);
                 }
 
             }
@@ -156,6 +153,7 @@ const useMusicEngine = () => {
                         console.log('Track finished playing.');
                         setProgress(0);
                         setDuration(0);
+                        setTrackName(null);
                         if (nextTrackLookUp === instTrackID) {
                             console.log('Next track contained same ID, rewinding and skip loading...')
                             player.seekTo(0);
@@ -186,77 +184,69 @@ const useMusicEngine = () => {
         }
       }, [player, playing]);
     
-    const progressBar = async (value) => {
-        if (sound && duration > 0) {
+    const progressBar = (value) => {
+        if (player.isLoaded && duration > 0) {
             const instPos = value * duration;
-            await sound.setPositionAsync(instPos);
+            player.seekTo(instPos);
         }
     };
 
-
-    useEffect(() => {
-        return () => {
-            if (player) {
-                player.remove();
-                setSource(null);
-            }
-        }
-    }, [player]);
-
     return { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, instTrackID, trackName };
-
 }
 
-//async function arrayBufferToBase64(arrayBuffer) {
-//    const wasmModule = await WebAssembly.instantiate<{
-//        encode2base64: (buffer) => string
-//    }>(AB2Base64);
-//
-//    const array = new Uint8Array(arrayBuffer);
-//
-//    const out = wasmModule.exports.encode2base64(array);
-//
-//    return out;
-//}
-
-const arrayBufferToBase64 = (buffer) => {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary)
-};
-
-const loadTrack = async (trackID, setInstTrackID, setSource) => {
+/**
+ * Fetch music and store to cache.
+ * 
+ * @param {string} trackID track's id
+ * @param {*} setInstTrackID setter for the current track'id (instant's track.)
+ * @returns {[boolean, string]} Success state | Link to cached track.
+ */
+const getSource = async (trackID, setInstTrackID) => {
     if (!trackID) {
         console.log(`Post request received ${trackID === null ? 'null' : 'undefined'} ID, returning...`);
-        return false;
+        return { success: false, source: '' }
     }
     try {
+        // Note to self: make sure to also maintain the wrapper's interceptor to intercept the correct route.
         const response = await requestLPAMB('post', '/api/music/play', {data: trackID});
         if (response) {
-            const base64String = arrayBufferToBase64(response);
-            const trackUrl = `data:audio/mpeg;base64,${base64String}`;
             
-            setSource(trackUrl);
+            const fileName = `${trackID}.mp3`;
 
-            // Create new sound instance
+            const file = new File(Paths.cache, fileName);
+
+            try {
+                file.create();
+                const responseArray = new Uint8Array(response);
+                
+                file.write(responseArray);
+            } catch {
+                console.log('Cached file already exist or no permission to write.');
+            }
+            const md5 = file.md5;
+
+            console.log(`MD5 was: ${md5}`);
+
+            const cachePath = file.uri;
+
+            //player.replace(response); // cannot access on different thread
+
+            // Set the instance's track ID
             setInstTrackID(trackID);
  
-            return true;
-
+            return { success: true, source: cachePath }
         } else {
             console.warn('Response empty!');
-            return false;
+            return { success: false, source: '' }
         }
     } catch (e) {
         console.warn('Cannot load track with error: ', e.message);
-        return false;
+        return { success: false, source: '' }
     }
 };
 
+
+// TODO: refactor to get full track info, store that in queue to fetch locally.
 const getTrackData = async (id, setTrackName) => {
     if (!id) {
         console.log(`Post request received ${trackID === null ? 'null' : 'undefined'} ID, returning...`);

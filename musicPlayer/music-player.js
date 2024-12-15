@@ -1,25 +1,33 @@
 import asyncQueueManager from "../async-queue-manager";
 import { useState, useEffect } from 'react';
-//import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import requestLPAMB from "../axios/wrapperAxios";
+import { File, Paths } from 'expo-file-system/next';
+
+async function pushQueue() {
+    await asyncQueueManager.upNext();
+    console.log('Queue was pushed up.');
+}
 
 /**
- * the queue logic of the app
- * @deprecated
+ * The queue logic of the app.
+ * Using expo-av.
+ * @deprecated superceeded by useMusicEngine.
+ * 
+ * @since 0.0.5 Last update for this function. 
  */
-
 const musicPlayerHook = () => {
+    const [requestSkipLoop, setRequestSkipLoop] = useState(false);
     const [sound, setSound] = useState(null);
     const [playing, setPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [timer, setTimer] = useState(null);
+    const [trackName, setTrackName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isHandling, setIsHandling] = useState(false);
-    const [currentTrackID, setCurrentTrackID] = useState(null);
+    const [isIdReady, setIsIdReady] = useState(false);
+    const [instTrackID, setInstTrackID] = useState(null);
     const [looping, setLooping] = useState(false);
-    
-    const player = useAudioPlayer();
 
     // Fetching track ID from queue
     useEffect(() => {
@@ -30,13 +38,12 @@ const musicPlayerHook = () => {
 
             const fetchedID= await asyncQueueManager.currentTrack();
             if (!fetchedID) {
-                //console.warn("Fetched an empty or null entry.");
                 return;
             }
             
             if (fetchedID) {
-                if (fetchedID !== currentTrackID) {
-                    setCurrentTrackID(fetchedID);
+                if (fetchedID !== instTrackID) {
+                    setInstTrackID(fetchedID);
                     console.log(`Current track ID updated with ${fetchedID}`);
                     setIsIdReady(true);
                 }
@@ -44,15 +51,17 @@ const musicPlayerHook = () => {
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [currentTrackID, isLoading, instTrackID]);
+    }, [isLoading, instTrackID]);
     
 
     useEffect(() => {
         if (sound) {
-            if (looping) {
-                sound.setIsLoopingAsync(true);
-            } else {
-                sound.setIsLoopingAsync(false);
+            if (requestSkipLoop == false) {
+                if (looping) {
+                    sound.setIsLoopingAsync(true);
+                } else {
+                    sound.setIsLoopingAsync(false);
+                }
             }
         }
     }, [looping, sound]);
@@ -70,6 +79,9 @@ const musicPlayerHook = () => {
 
     const trackSkipper = () => {
         if (sound) {
+            if (looping) {
+                setRequestSkipLoop(true);
+            }
             sound.setPositionAsync(duration);
             console.log('Skipping the track...');
         }
@@ -88,8 +100,8 @@ const musicPlayerHook = () => {
         })
 
 
-        console.log('Handling trackID: ',currentTrackID); // Log to verify trackID passed in
-        if (!currentTrackID) {
+        console.log('Handling trackID: ', instTrackID);
+        if (!instTrackID) {
             console.log("trackID is undefined. Aborting track load.");
             return;
         }
@@ -97,27 +109,29 @@ const musicPlayerHook = () => {
         setIsHandling(true);
         setIsLoading(true);
         
-        console.log("Calling loadTrack with ID: ", currentTrackID);
+        console.log("Calling loadTrack with ID: ", instTrackID);
 
-        const { newTrack, trackId: loadedID } = await loadTrack(currentTrackID, setInstTrackID, sound, setSound);
-        await loadName(currentTrackID, setTrackName);
-        if (newTrack) {
+        const { success, newSound } = await loadTrack(instTrackID, setInstTrackID, sound, setSound);
+
+        if (success) {
+            await loadName(instTrackID, setTrackName);
+
             console.log('Track loaded successfully.');
-            setSound(newTrack);
+            setSound(newSound);
 
             if (playing) {
                 console.log('Starting playback...');
-                newTrack.playAsync();
+                newSound.playAsync();
             }
 
-            newTrack.setOnPlaybackStatusUpdate(async (status) => {
+            newSound.setOnPlaybackStatusUpdate(async (status) => {
                 if(status.isLoaded) {
                     setProgress(status.positionMillis / status.durationMillis);
                     setDuration(status.durationMillis);
                 }
             });
         } else {
-            console.warn('Failed to load the track. TrackID:', currentTrackID);
+            console.warn('Failed to load the track. TrackID:', instTrackID);
             setIsHandling(false);
         }
         console.log('Reseting flow control flags...');
@@ -134,11 +148,11 @@ const musicPlayerHook = () => {
                     if (status.isLoaded) {
                         setProgress(status.positionMillis / status.durationMillis);
                         setDuration(status.durationMillis);
-                        //console.log(`Progress: ${status.positionMillis}`);
+                        
                     }
                 });
             }
-            }, 1000); // Adjust the interval as needed
+            }, 1000);
 
             sound.setOnPlaybackStatusUpdate(async (status) => {
                 const nextTrackLookUp = await asyncQueueManager.seekTrack(1);
@@ -146,19 +160,36 @@ const musicPlayerHook = () => {
                     if(!status.isLooping) {
                         console.log('Track finished playing.');
                         setProgress(0);
-                        if (nextTrackLookUp === currentTrackID) {
+                        setDuration(0);
+                        setTrackName(null);
+                        if (nextTrackLookUp === instTrackID) {
                             console.log('Next track contained same ID, rewinding and skip loading...')
                             sound.setPositionAsync(0);
-                            await asyncQueueManager.upNext();
-                            console.log('Queue was pushed up.');
+                            await pushQueue();
                         } else {
-                            await asyncQueueManager.upNext();
-                            console.log('Queue was pushed up.');
+                            await pushQueue();
         
-                            clearInterval(timer);
                             clearInterval(intervalId);
-        
                             setInstTrackID(null);
+                        }
+                    } else if (status.isLooping && requestSkipLoop == true) {
+                        console.log(`Skipping current track and loop next track.`);
+                        if (nextTrackLookUp === instTrackID) {
+                            console.log('Next track contained same ID, skip loading...');
+                            await pushQueue();
+                        } else {
+                            sound.setIsLoopingAsync(false);
+                            setSound(null);
+                            setProgress(0);
+                            setDuration(0);
+                            setTrackName(null);
+                            
+                            await pushQueue();
+
+                            clearInterval(intervalId);
+                            setInstTrackID(null);
+
+                            setRequestSkipLoop(false);
                         }
                     }
                 }
@@ -176,13 +207,13 @@ const musicPlayerHook = () => {
     };
 
     useEffect(() => {
-        if (!isHandling && currentTrackID && instTrackID === null) {
+        if (!isHandling && instTrackID) {
             console.log('Checking if ID is ready... current state:', isIdReady);
             if (isIdReady) {
                 trackHandler();
             }
         }
-    }, [currentTrackID, instTrackID, isIdReady]);
+    }, [instTrackID, isIdReady]);
 
 
     useEffect(() => {
@@ -191,27 +222,59 @@ const musicPlayerHook = () => {
                 sound.unloadAsync();
                 setSound(null);
             }
-            clearInterval(timer);
         }
     }, [sound])
 
-    return { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, currentTrackID, instTrackID, trackName };
+    return { playing, setPlaying, looping, setLooping, trackSkipper, trackHandler, progress, progressBar, duration, isHandling, isLoading, isIdReady, instTrackID, trackName };
 }
 
 
+const checkFile = async (trackID) => {
+    try {
+        const fileName = `${trackID}.mp3`;
+        const file = new File(Paths.cache, fileName);
+
+        if (file.exists) {
+            const md5 = file.md5;
+
+            const data = {trackID, md5};
+
+            const response = await requestLPAMB('post', '/api/music/check', { data: data });
+            if (response.isMatch = true) {
+                return { isSameFile: false, file: file};
+            }
+
+        }
+    } catch (e) {
+
+    }
+}
 
 
 const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
     if (!trackID) {
         console.log(`Post request received ${trackID === null ? 'null' : 'undefined'} ID, returning...`);
-        return { newTrack: null, trackId: null };
+        return { success: false , newSound: null };
     }
     try {
+
+        const { isSameFile, file } = await checkFile(trackID);
+
         const response = await requestLPAMB('post', '/api/music/play', {data: trackID});
         if (response) {
-            const base64String = arrayBufferToBase64(response);
-            const trackUrl = `data:audio/mpeg;base64,${base64String}`;
 
+
+
+            try {
+                file.create();
+                const responseArray = new Uint8Array(response);
+                
+                file.write(responseArray);
+            } catch {
+                console.log('Cached file already exist or no permission to write.');
+            }
+
+            const cachePath = file.uri;
             // Unload current sound if request to play another track
             if (sound) {
                 await sound.unloadAsync();
@@ -219,21 +282,21 @@ const loadTrack = async (trackID, setInstTrackID, sound, setSound) => {
             }
 
             // Create new sound instance
-            const { sound: newTrack } = await Audio.Sound.createAsync(
-                { uri: trackUrl },
+            const { sound: newSound } = await Audio.Sound.createAsync(
+                { uri: cachePath },
                 { shouldPlay: false }
             );
             setInstTrackID(trackID);
  
-            return { newTrack, trackId: trackID }
+            return { success: true , newSound: newSound }
 
         } else {
             console.warn('Response empty!');
-            return { newTrack: null, trackId: null };
+            return { success: false , newSound: null };
         }
     } catch (e) {
         console.warn('Cannot load track with error: ', e.message);
-        return { newTrack: null, trackId: null };
+        return { success: false , newSound: null };
     }
 };
 

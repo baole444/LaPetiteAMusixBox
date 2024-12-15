@@ -33,5 +33,8 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-Server/audioData.log
+
+
+# additional ignore file
+metro.config.txt
 app_forBuild.json

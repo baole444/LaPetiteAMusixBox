@@ -1,5 +1,6 @@
 import {  createContext, useContext } from "react";
-import useMusicEngine from "./useMusicEngine";
+//import useMusicEngine from "./useMusicEngine";
+import musicPlayerHook from "./music-player";
 
 
 // Context allow seperation of hook and render.
@@ -8,8 +9,8 @@ import useMusicEngine from "./useMusicEngine";
 const MusicControllerContext = createContext();
 
 export const MusicControllerProvider = ({ children }) => {
-    const musicHook = useMusicEngine();
-
+    //const musicHook = useMusicEngine();
+    const musicHook = musicPlayerHook();
     return (
         <MusicControllerContext.Provider value={musicHook}>
             {children}
