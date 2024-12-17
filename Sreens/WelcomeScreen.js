@@ -19,7 +19,7 @@ function WelcomeScreen({ navigation }) {
     <View style={style.container}>
       <View style={style.content}>
         <Image_reload
-          source={require('../assets/LPAMB.png')} 
+          src={require('../assets/texture/LPAMB.png')}
           scale={1}
         />
         <Text style={style.title}>L.P.A.M.B</Text>

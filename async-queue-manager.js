@@ -1,63 +1,62 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const pushQueue = async (track_id) => {
-    const queue = await AsyncStorage.getItem('playerQueue');
-    const update = queue ? [...JSON.parse(queue), track_id] : [track_id];
-    await AsyncStorage.setItem('playerQueue', JSON.stringify(update)); 
-};
+const pushQueue = async (trackInfo) => {
+    const queue = await readQueue();
+
+    queue.push(trackInfo);
+
+    await AsyncStorage.setItem('queue', JSON.stringify(queue)); 
+}
 
 const readQueue = async () => {
-    const queue = await AsyncStorage.getItem('playerQueue');
+    const queue = await AsyncStorage.getItem('queue');
     return queue ? JSON.parse(queue) : [];
-};
+}
 
 const readIp = async () => {
     const queue = await AsyncStorage.getItem('serverIp');
     return queue ? JSON.parse(queue) : [];
-};
-
-const currentTrack = async () => {
-    const queue = await readQueue ();
-    if (queue.length > 0) {
-        const next = queue[0];
-        return next;
-    }
-    return null;
 }
 
-const seekTrack = async (position) => {
+const seekQueue = async (position) => {
     const queue = await readQueue();
     if (queue.length > 0) {
         const result = queue[position];
+
+        if (!result) {
+            return null;
+        }
+
         return result;
     }
     return null;
 }
+
 const upNext = async () => {
     const queue = await readQueue();
     if (queue.length > 0) {
-        const nextQueue = queue.slice(1);
-        await AsyncStorage.setItem('playerQueue', JSON.stringify(nextQueue));
+        queue.splice(0, 1);
+        await AsyncStorage.setItem('queue', JSON.stringify(queue));
     }
-};
+}
 
 const dumpQueueData = async () => {
     try {
-        const jsonValue = await AsyncStorage.getItem('playerQueue'); // Retrieve the stored queue data
+        const jsonValue = await readQueue();
         if (jsonValue != null) {
-            const queueData = JSON.parse(jsonValue); // Parse the JSON string back to an array
-            console.log('Queue Data:', queueData); // Log the queue data
+            const queueData = JSON.parse(jsonValue);
+            console.log('Queue Data:', queueData);
         } else {
-            console.log('No queue data found.'); // Log if no data is found
+            console.log('No queue data found.');
         }
     } catch (e) {
-        console.error('Error retrieving queue data:', e); // Handle errors
+        console.error('Error retrieving queue data:', e); 
     }
-};
+}
 
 const clearQueue = async () => {
     try {
-        await AsyncStorage.removeItem('playerQueue');
+        await AsyncStorage.removeItem('queue');
         console.log('Queue cleared successfully!');
     } catch (error) {
         console.error('Error clearing the queue:', error);
@@ -151,8 +150,7 @@ const deletePlaylistItem = async (trackId) => {
 export default {
     readQueue,
     pushQueue,
-    currentTrack,
-    seekTrack,
+    seekQueue,
     upNext,
     dumpQueueData,
     clearQueue,

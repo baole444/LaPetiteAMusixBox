@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors } from '../universal';
+import colors from './colors';
 
 /**
  * Styles that reappeared multiple time.

@@ -1,6 +1,7 @@
 import asyncQueueManager from "../async-queue-manager";
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, TextInput} from 'react-native';
+import { colors, styles } from '../universal';
 
 const findIp = async () => {
     try {
@@ -12,7 +13,7 @@ const findIp = async () => {
     }
 }
 
-function DevIpConfig() {
+function DevIpConfig({ navigation }) {
     const [ip, setIp] = useState(null);
     const [currIp, setCurrIp] = useState("Loading...");
 

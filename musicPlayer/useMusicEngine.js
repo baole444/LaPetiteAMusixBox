@@ -31,7 +31,7 @@ const useMusicEngine = () => {
                 return;
             }
 
-            const fetchedID= await asyncQueueManager.currentTrack();
+            const fetchedID= await asyncQueueManager.seekQueue(0);
             if (!fetchedID) {
                 return;
             }

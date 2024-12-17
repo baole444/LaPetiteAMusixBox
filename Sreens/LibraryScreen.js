@@ -10,9 +10,9 @@ const style = styles.libraryStyle;
 const shared = styles.sharedStyle
 const presstable = styles.sharedPresstable;
 
-const sendPlayRequest = async (track_id) => {
-  asyncQueueManager.pushQueue(track_id);
-  console.log(`Added ${track_id} to queue.`);
+const sendPlayRequest = async (trackInfo) => {
+  asyncQueueManager.pushQueue(trackInfo);
+  console.log(`Added ${trackInfo.trackId} to queue.`);
 };
 
 function LibraryScreen({ navigation }) {
@@ -89,7 +89,7 @@ function LibraryScreen({ navigation }) {
       <View style={presstable.presstable_sub_container}>
         <Pressable
           style={presstable.button}
-          onPress={() => sendPlayRequest(item.trackId)}
+          onPress={() => sendPlayRequest(item)}
         >
           <Text style={presstable.button_text}>Add to queue</Text>
         </Pressable>

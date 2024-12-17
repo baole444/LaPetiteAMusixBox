@@ -8,9 +8,9 @@ const style = styles.homescrStyle;
 const shared = styles.sharedStyle;
 const presstable = styles.sharedPresstable;
 
-const sendPlayRequest = async (track_id) => {
-  asyncQueueManager.pushQueue(track_id);
-  console.log(`Added ${track_id} to queue.`);
+const sendPlayRequest = async (track_info) => {
+  asyncQueueManager.pushQueue(track_info);
+  console.log(`Added ${track_info.trackId} to queue...`);
 };
 
 const saveToPlayList = async (track_info) => {
@@ -23,7 +23,7 @@ function HomeScreen({ navigation }) {
   const [keyword, setKeyword] = useState('');
 
   const sendData = async () => {
-      const response = await requestLPAMB('post', '/search', {data: keyword});
+      const response = await requestLPAMB('post', '/api/music/search', {data: keyword});
       try {
           if (Array.isArray(response)) {
               setTrackData(response);
@@ -86,7 +86,7 @@ function HomeScreen({ navigation }) {
             <View style={presstable.presstable_sub_container}>
               <Pressable
                 style={presstable.button}
-                onPress={() => sendPlayRequest(item.trackId)}
+                onPress={() => sendPlayRequest(item)}
               >
                 <Text style={presstable.button_text}>Add to queue</Text>
               </Pressable>

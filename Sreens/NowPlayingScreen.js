@@ -5,7 +5,6 @@ import { colors, styles } from '../universal';
 import PlayerScreen from './PlayerAllscr';
 import Image_reload from '../Image_reload';
 import asyncQueueManager from '../async-queue-manager';
-import requestLPAMB from '../axios/wrapperAxios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -13,91 +12,59 @@ const style = styles.nowPlayingStyle;
 const presstable = styles.sharedPresstable
 
 function NowPlayingScreen({ navigation }) {
-  const [trackList, setTrackData] = useState([]); // For fetched track details
-  const [queue, setQueue] = useState([]); // For track IDs in the queue
+  const [trackList, setTrackData] = useState([]);
 
   // Fetch detailed info for all tracks in the queue
   const fetchQueueInfo = async () => {
-    try {
-      const queueIds = await asyncQueueManager.readQueue();
-      console.log('Queue IDs:', queueIds);
+      try {
+          const queue = await asyncQueueManager.readQueue();
 
-      if (!Array.isArray(queueIds) || queueIds.length === 0) {
-          console.log('No tracks in the queue.');
-          setTrackData([]);
-          return;
+          if (!Array.isArray(queue) || queue.length === 0) {
+              console.log('No tracks in the queue.');
+              setTrackData([]);
+              return;
+          }
+
+          setTrackData(queue);
+      } catch (error) {
+          console.error('Error in fetchQueueInfo:', error.message);
       }
-
-      const trackDataPromises = queueIds.map((id) => fetchInfo(id));
-      const resolvedTracks = await Promise.all(trackDataPromises);
-      const validTracks = resolvedTracks.filter((track) => track);
-      setTrackData(validTracks);
-  } catch (error) {
-      console.error('Error in fetchQueueInfo:', error.message);
-  }
   };
 
-  // Fetch details for a single track
-  const fetchInfo = async (track_id) => {
-    try {
-      console.log('Calling fetchInfo for ID:', track_id);
-      const response = await requestLPAMB('post', '/api/music/fullinfo', { data: track_id });
-      if (response && typeof response === 'object' && !Array.isArray(response)) {
-        return response; 
-      }
-    } catch (error) {
-      console.error('Error fetching track info:', error.message);
-    }
-    return null; a
-  };
   useFocusEffect(
-    React.useCallback(() => {
+      React.useCallback(() => {
 
       const initializeQueue = async () => {
-        try {
-          const savedQueue = await asyncQueueManager.readQueue();
-          setQueue(savedQueue || []);
-        } catch (error) {
-          console.error('Error initializing queue:', error);
-        }
+          try {
+              const queue = await asyncQueueManager.readQueue();
+              setTrackData(queue || []);
+          } catch (error) {
+              console.error('Error initializing queue:', error);
+          }
       };
   
-      initializeQueue();
+          initializeQueue();
   
-      return () => {};
-    }, []) 
+          return () => {};
+      }, []) 
   );
 
-  useEffect(() => {
-    fetchQueueInfo();
-  }, []);
-  
-  useEffect(() => {
-    if (queue.length > 0) {
-      fetchQueueInfo(); // Fetch updated track info whenever queue changes
-    }
-  }, [queue]);
-
   // Remove a track from the queue
-  const removeFromQueue = async (trackId) => {
-    try {
-      // Filter out the track to be removed
-      const updatedQueue = queue.filter((item) => item !== trackId);
+  const removeFromQueue = async (index) => {
+      try {
+          const updatedQueue = [...trackList];
+
+          updatedQueue.splice(index, 1);
   
-      // Update AsyncStorage
-      await AsyncStorage.setItem('playerQueue', JSON.stringify(updatedQueue));
+          await AsyncStorage.setItem('queue', JSON.stringify(updatedQueue));
   
-      // Update local state
-      setQueue(updatedQueue);
-  
-      // Update track list
-      const updatedTrackList = trackList.filter((track) => track.trackId !== trackId);
-      setTrackData(updatedTrackList);
-  
-      console.log(`Track with ID ${trackId} removed successfully.`);
-    } catch (error) {
-      console.error("Error removing track from queue: ", error);
-    }
+          setTrackData(updatedQueue);
+
+          fetchQueueInfo();
+          console.log(`Track at index ${index} removed successfully.`);
+      } catch (error) {
+          console.error("Error removing track from queue: ", error);
+      }
   };
 
   useEffect(() => {
@@ -128,12 +95,16 @@ function NowPlayingScreen({ navigation }) {
             <View key={index} style={style.song_card}>
               <Text style={style.next_song_title}>{item.title}</Text>
                 <Text style={style.song_card_artist}>{item.artist}</Text>
-              <Pressable
-                style={presstable.button}
-                onPress={() => removeFromQueue(item.trackId)}
-              >
-                <Text style={presstable.button_text}>Remove</Text>
-              </Pressable>
+                {(index > 0) ? (
+                  <Pressable
+                    style={presstable.button}
+                    onPress={() => removeFromQueue(index)}
+                    >
+                    <Text style={presstable.button_text}>Remove</Text>
+                  </Pressable>
+                ) : (
+                  <Text style={style.song_card_artist}>Current track</Text>
+                )}
             </View>
           ))
         ) : (
