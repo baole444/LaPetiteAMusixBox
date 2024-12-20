@@ -4,7 +4,7 @@ import { View, StyleSheet, Dimensions  } from 'react-native';
 import { NavigationContainer, useNavigationState, useNavigationContainerRef } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFonts } from 'expo-font';
+//import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
@@ -45,10 +45,10 @@ function App() {
       prefixes: [prefix],
     };
 
-    const [loaded, error] = useFonts({
-        'Caudex': require('./assets/fonts/Caudex.ttf'),
-        'Consola': require("./assets/fonts/Consola.ttf"),
-    }); 
+    //const [loaded, error] = useFonts({
+    //    'Caudex': require('./assets/fonts/Caudex.ttf'),
+    //    'Consola': require("./assets/fonts/Consola.ttf"),
+    //}); 
 
     const [dimensions, setDimensions] = useState({
         window: windowsDimensions,
@@ -70,11 +70,11 @@ function App() {
       return () => listener?.remove();
     });
 
-    useEffect(() => {
-        if (loaded || error) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded, error]);
+    //useEffect(() => {
+    //    if (loaded || error) {
+    //        SplashScreen.hideAsync();
+    //    }
+    //}, [loaded, error]);
 
     useEffect(() => {
       requestPerm();
@@ -94,10 +94,9 @@ function App() {
       }
   }, [isNavigationReady]);
 
-    if (!loaded && !error) {
-        return null;
-    }
-
+    //if (!loaded && !error) {
+    //    return null;
+    //}
 
     return (
       <GestureHandlerRootView>
@@ -120,9 +119,9 @@ function App() {
                 <Drawer.Screen name= "Register" component={RegisterScreen} />
                 <Drawer.Screen name= "Library" component={LibraryScreen} />
                 <Drawer.Screen name= "Now Playing" component={NowPlayingScreen} /> 
-                <Drawer.Screen name = "Dev Portal" component={DevIpConfig} />
+                <Drawer.Screen name = "Music Service" component={DevIpConfig} />
               </Drawer.Navigator>
-              {currentRouteName && !["Login", "Now Playing", "Register", "Dev Portal"].includes(currentRouteName) && (
+              {currentRouteName && !["Login", "Now Playing", "Register", "Music Service"].includes(currentRouteName) && (
                 <PlayerScreen />
               )}       
             </View>

@@ -32,7 +32,7 @@ const sharedStyle = StyleSheet.create({
     },
     container_account: {
         flex: 1,
-        backgroundColor: '#d9d9d9',
+        backgroundColor: colors.background,
         alignItems: 'center',
         padding: 20,
     },
@@ -156,7 +156,7 @@ const homescrStyle = StyleSheet.create({
     },
     card: {
         width: '86%',
-        backgroundColor: '#FFD700',
+        backgroundColor: colors.yellow,
         borderRadius: 10,
         marginBottom: 15,
     },
@@ -176,14 +176,14 @@ const libraryStyle = StyleSheet.create({
         marginTop: 20,
     },
     card: {
-        backgroundColor: '#FFD700',
+        backgroundColor: colors.yellow,
         borderRadius: 10,
         marginBottom: 15,
     },
     song_container: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#FFD700',
+        backgroundColor: colors.yellow,
         borderRadius: 10,
         marginBottom: 15,
         padding: 10,
@@ -253,7 +253,7 @@ const nowPlayingStyle = StyleSheet.create({
 const welcome = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#d9d9d9',
+        backgroundColor: colors.background,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -283,6 +283,20 @@ const welcome = StyleSheet.create({
     },
 });
 
+const devip = StyleSheet.create({
+    input: {
+        backgroundColor: '#fff',
+        width: "350",
+        backgroundColor: 'white',
+        height: 40,
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 10,
+        borderColor: 'gray',
+        borderWidth: 1,
+    },
+})
+
 export default {
     sharedStyle,
     sharedPresstable,
@@ -290,4 +304,5 @@ export default {
     libraryStyle,
     nowPlayingStyle,
     welcome,
+    devip,
 }

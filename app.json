@@ -45,10 +45,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/Caudex.ttf",
-            "./assets/fonts/Consola.ttf"
-          ]
+          "fonts": []
         }
       ],
       "expo-asset",
