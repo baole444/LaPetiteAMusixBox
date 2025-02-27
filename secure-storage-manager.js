@@ -1,5 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
+const rsa = "rsaPublicKey";
+
 const saveKey = async(key, value) => {
     await SecureStore.setItemAsync(key, value);
 }
@@ -34,6 +36,40 @@ const dumpValueToLog = async(key) => {
     } else {
         console.log(`${key} is empty.`);
     }
+}
+
+async function saveRSAPublicKey(value) {
+    if (!value) {
+        console.warn(`No RSA key was passed in, value = ${value}`);
+        return;
+    }
+    try {
+        await saveKey(rsa, value);
+    } catch (e) {
+        console.log(`Failed to save rsa public key: ${e.message}`);
+    }
+}
+
+async function deleteRSAPublicKey() {
+    try {
+        await removeKey(rsa);
+    } catch (e) {
+        console.log(`Failed to remove rsa public key: ${e.message}`);
+    }
+}
+
+async function updateRSAPublicKey(value) {
+    if (!value) {
+        console.warn(`No RSA key was passed in, value = ${value}`);
+        return;
+    }
+
+    try {
+        await resetKey(rsa, value);
+    } catch (e) {
+        
+    }
+    
 }
 
 export default {
